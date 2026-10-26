@@ -13,17 +13,16 @@
   .card b{display:block;font-size:22px;color:#fff;margin-top:4px}
   
   .table-wrap{overflow-x:auto;background:#151d26;border-radius:12px;padding:10px}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
   th,td{padding:12px 8px;border-bottom:1px solid #26313d;text-align:center}
   th{color:#8fb3a0;font-weight:normal; background:#1c2530}
   
   .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#555}
   .dot.on{background:#22c55e;box-shadow:0 0 8px #22c55e}
   
-  button{padding:6px 8px;border:0;border-radius:6px;cursor:pointer;font-weight:700;font-size:11px;margin:2px;}
+  button{padding:6px 10px;border:0;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;margin:2px;}
   .ban{background:#dc2626;color:#fff}
   .unban{background:#16a34a;color:#fff}
-  .add-coin{background:#eab308;color:#000;}
   .set-coin{background:#3b82f6;color:#fff;}
   
   .level-badge {background:#8b5cf6;color:#fff;padding:2px 6px;border-radius:4px;font-weight:bold;}
@@ -38,10 +37,9 @@
   <table>
     <thead>
       <tr>
-        <th>Trạng thái</th>
+        <th>Online</th>
         <th>Tài khoản</th>
         <th>Cấp độ</th>
-        <th>Đã thu hoạch</th>
         <th>Xu</th>
         <th>Hành động</th>
       </tr>
@@ -64,7 +62,6 @@ async function loadStats() {
     document.getElementById('cards').innerHTML = `
       <div class="card"><span>Tổng TK</span><b>${s.accounts}</b></div>
       <div class="card"><span>Online</span><b style="color:#22c55e">${s.online}</b></div>
-      <div class="card"><span>Mới hôm nay</span><b>${s.newToday}</b></div>
       <div class="card"><span>Bị khoá</span><b style="color:#dc2626">${s.banned}</b></div>
     `;
   } catch(e) { console.log('Lỗi tải stats', e); }
@@ -83,10 +80,8 @@ async function loadUsers() {
         <td><span class="dot ${u.online ? 'on' : ''}"></span></td>
         <td style="font-weight:bold">${u.username}${u.is_admin ? ' 👑' : ''}</td>
         <td><span class="level-badge">Lv.${u.level}</span></td>
-        <td>🌾 ${u.total_harvested || 0} cây</td>
         <td style="color:#eab308; font-weight:bold">💰 ${u.coins}</td>
         <td>
-          <button class="add-coin" onclick="addCoins(${u.id}, '${u.username}')">Tặng Xu</button>
           <button class="set-coin" onclick="setCoins(${u.id}, ${u.coins}, '${u.username}')">Sửa Xu</button>
           ${u.is_admin ? '' : `
             <button class="${u.is_banned ? 'unban' : 'ban'}" onclick="setBan(${u.id}, ${u.is_banned ? 0 : 1})">
@@ -99,19 +94,7 @@ async function loadUsers() {
   } catch(e) { console.log('Lỗi tải users', e); }
 }
 
-// Hàm TẶNG xu (cộng thêm)
-async function addCoins(id, username) {
-  const amount = prompt(`Tặng thêm bao nhiêu xu cho "${username}"? (Nhập số âm để trừ tiền)`, "1000");
-  if (amount !== null && !isNaN(amount)) {
-    await fetch(`/api/admin/users/${id}/addcoins`, {
-      method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: parseInt(amount) })
-    });
-    loadUsers();
-  }
-}
-
-// Hàm SỬA xu (ghi đè)
+// Hàm SỬA xu (ghi đè số tiền)
 async function setCoins(id, currentCoins, username) {
   const newCoins = prompt(`Sửa lại tổng số xu của "${username}":`, currentCoins);
   if (newCoins !== null && !isNaN(newCoins)) {
@@ -123,6 +106,7 @@ async function setCoins(id, currentCoins, username) {
   }
 }
 
+// Hàm Khoá/Mở khoá
 async function setBan(id, banned) {
   if(!confirm(banned ? 'Bạn có chắc muốn BAN tài khoản này?' : 'Mở khoá tài khoản này?')) return;
   await fetch(`/api/admin/users/${id}/ban`, { 
