@@ -5,85 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🌻 Nông Trại Tuấn Pro</title>
 <style>
+  /* DÁN TOÀN BỘ PHẦN <style> CỦA BẠN VÀO ĐÂY */
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  /* ===== NỀN TRẮNG → ĐEN ===== */
-  body {
-    margin: 0;
-    padding: 16px 16px 90px;
-    text-align: center;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    min-height: 100vh;
-    color: #e8f5e9;
-    user-select: none;
-    background: linear-gradient(180deg, #ffffff 0%, #d8d8d8 20%, #8a8a8a 45%, #3a3a3a 70%, #0a0a0a 100%);
-    background-attachment: fixed;
-    position: relative;
-    overflow-x: hidden;
-  }
-
+  body { margin: 0; padding: 16px 16px 90px; text-align: center; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; color: #e8f5e9; user-select: none; background: linear-gradient(180deg, #ffffff 0%, #d8d8d8 20%, #8a8a8a 45%, #3a3a3a 70%, #0a0a0a 100%); background-attachment: fixed; position: relative; overflow-x: hidden; }
   body > * { position: relative; z-index: 1; }
-
-  h1 {
-    color: #ffffff;
-    text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 24px rgba(255,255,255,.5);
-    margin: 8px 0 16px;
-    font-size: clamp(22px, 6vw, 34px);
-    letter-spacing: 1px;
-    animation: titleGlow 3s ease-in-out infinite alternate;
-  }
-  @keyframes titleGlow {
-    from { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 12px rgba(255,255,255,.3); }
-    to   { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 28px rgba(255,255,255,.8); }
-  }
-
-  h2 { margin: 8px 0; font-size: 18px; color: #176a36; }
-
-  /* ===== THANH CHỈ SỐ ===== */
+  h1 { color: #ffffff; text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 24px rgba(255,255,255,.5); margin: 8px 0 16px; font-size: clamp(22px, 6vw, 34px); letter-spacing: 1px; animation: titleGlow 3s ease-in-out infinite alternate; }
+  @keyframes titleGlow { from { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 12px rgba(255,255,255,.3); } to { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 28px rgba(255,255,255,.8); } }
   .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .stats div {
-    background: rgba(255,255,255,.95); color: #1a1a1a; padding: 10px 16px; border-radius: 14px;
-    font-weight: 700; font-size: 15px; box-shadow: 0 3px 0 rgba(0,0,0,.5), 0 0 12px rgba(255,255,255,.15);
-    border: 1px solid rgba(0,0,0,.1);
-  }
-
-  /* ===== KHU VƯỜN ===== */
-  .garden-wrap {
-    max-width: 480px; margin: 0 auto 16px; padding: 18px 12px;
-    background: linear-gradient(135deg, #7cc47f, #4ea65a 60%, #3d8f4a); border-radius: 24px;
-    box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.3), inset 0 0 0 3px rgba(255,255,255,.25), inset 0 -8px 0 rgba(0,0,0,.15);
-    position: relative;
-  }
+  .stats div { background: rgba(255,255,255,.95); color: #1a1a1a; padding: 10px 16px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 3px 0 rgba(0,0,0,.5), 0 0 12px rgba(255,255,255,.15); border: 1px solid rgba(0,0,0,.1); }
+  .garden-wrap { max-width: 480px; margin: 0 auto 16px; padding: 18px 12px; background: linear-gradient(135deg, #7cc47f, #4ea65a 60%, #3d8f4a); border-radius: 24px; box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.3), inset 0 0 0 3px rgba(255,255,255,.25), inset 0 -8px 0 rgba(0,0,0,.15); position: relative; }
   .garden-wrap::before { content: ""; position: absolute; inset: 8px; border: 2px dashed rgba(255,255,255,.4); border-radius: 18px; pointer-events: none; }
   .garden-title { color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,.5); margin-bottom: 12px; position: relative; z-index: 1; }
-
   #garden { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; justify-content: center; max-width: 400px; margin: 0 auto; position: relative; z-index: 1; }
-
-  .plot {
-    aspect-ratio: 1; min-height: 96px;
-    background: radial-gradient(circle at 30% 25%, #b98253 0%, transparent 55%), linear-gradient(160deg, #b07a45 0%, #8a5228 55%, #6b3f1e 100%);
-    border: 4px solid #5a3417; border-radius: 18px; font-size: 40px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
-    transition: transform .12s, box-shadow .25s, border-color .25s; padding: 0; color: #fff;
-    box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), inset 0 4px 0 rgba(255,255,255,.12), 0 6px 12px rgba(0,0,0,.5);
-  }
-  .plot::before {
-    content: ""; position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(0,0,0,.18) 1px, transparent 1.5px), radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.5px);
-    background-size: 14px 14px, 20px 20px; background-position: 0 0, 7px 7px; pointer-events: none; opacity: .8;
-  }
+  .plot { aspect-ratio: 1; min-height: 96px; background: radial-gradient(circle at 30% 25%, #b98253 0%, transparent 55%), linear-gradient(160deg, #b07a45 0%, #8a5228 55%, #6b3f1e 100%); border: 4px solid #5a3417; border-radius: 18px; font-size: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: transform .12s, box-shadow .25s, border-color .25s; padding: 0; color: #fff; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), inset 0 4px 0 rgba(255,255,255,.12), 0 6px 12px rgba(0,0,0,.5); touch-action: manipulation; }
+  .plot::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0,0,0,.18) 1px, transparent 1.5px), radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.5px); background-size: 14px 14px, 20px 20px; background-position: 0 0, 7px 7px; pointer-events: none; opacity: .8; }
+  .plot.drag-over { border-color: #ffe680; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), 0 0 0 6px rgba(255,230,128,.8), 0 0 24px rgba(255,230,128,.9); transform: scale(1.06); }
   .plot.ready { border-color: #ffd257; animation: bounce .8s infinite alternate; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), 0 0 22px rgba(255,210,87,.95), 0 0 0 3px rgba(255,230,128,.6); }
   @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-7px); } }
-
-  /* ===== MÀN HÌNH ĐĂNG NHẬP ===== */
-  #authBox { 
-    max-width: 340px; margin: 60px auto; background: rgba(255,255,255,0.95); color: #111; 
-    padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-  }
-  #authBox input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; outline: none; }
+  .progress-wrap { position: absolute; left: 8px; right: 8px; bottom: 7px; height: 12px; background: rgba(0,0,0,.5); border-radius: 8px; overflow: hidden; pointer-events: none; box-shadow: inset 0 2px 3px rgba(0,0,0,.6); }
+  .progress { height: 100%; background: linear-gradient(90deg, #8ff05a, #3ea832, #2a8a24); border-radius: 8px; transition: width .9s linear; box-shadow: 0 0 8px rgba(120,240,90,.9); }
+  .plot .crop-icon { font-size: 44px; line-height: 1; filter: drop-shadow(0 3px 4px rgba(0,0,0,.5)); animation: sway 2.5s ease-in-out infinite; }
+  @keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+  .plot.ready .crop-icon { animation: popReady .6s ease-in-out infinite alternate; filter: drop-shadow(0 4px 8px rgba(255,210,87,.9)); }
+  @keyframes popReady { from { transform: scale(1) rotate(-2deg); } to { transform: scale(1.15) rotate(2deg); } }
+  .toolbar { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 480px; margin: 0 auto 16px; }
+  .tool-btn { flex: 1 1 0; min-width: 100px; padding: 14px 10px; border: none; border-radius: 16px; background: linear-gradient(180deg, #3aa85c, #278746); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 0 #1b5c30, 0 8px 16px rgba(0,0,0,.4); transition: transform .12s, box-shadow .12s, filter .2s; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .tool-btn.active { background: linear-gradient(180deg, #f5b93c, #e8a726); box-shadow: 0 4px 0 #b17c14, 0 8px 16px rgba(0,0,0,.4); }
+  .gui-panel { max-width: 520px; margin: 0 auto; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .4s ease, opacity .3s ease, margin .3s; }
+  .gui-panel.open { max-height: 2000px; opacity: 1; margin-bottom: 16px; }
+  .gui-inner { background: rgba(255,255,255,.97); border-radius: 20px; padding: 16px; border: 2px solid rgba(0,0,0,.15); box-shadow: 0 8px 24px rgba(0,0,0,.5); text-align: center; color: #1a1a1a; }
+  .seed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
+  .seed-card { background: #fff; border: 2px solid #cde3b8; border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; font-size: 12px; }
+  .seed-card.selected { outline: 3px solid #ffd257; border-color: #e8a726; }
+  .seed-card .s-icon { font-size: 26px; display: block; margin-bottom: 4px; }
+  #message { min-height: 24px; font-weight: 700; color: #ffffff; background: rgba(0,0,0,.7); display: inline-block; padding: 8px 18px; border-radius: 20px; margin: 8px 0 16px; font-size: 15px; }
+  #toast { position: fixed; top: 14px; left: 50%; transform: translate(-50%, -120%); background: #176a36; color: #fff; padding: 12px 20px; border-radius: 30px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.6); transition: transform .35s; z-index: 200; }
+  #toast.show { transform: translate(-50%, 0); }
+  #authBox { max-width: 340px; margin: 60px auto; background: rgba(255,255,255,0.95); color: #111; padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+  #authBox input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; }
   #authBox button { width: 100%; padding: 14px; background: #2e9e4f; color: #fff; border: 0; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
-  #authBox .btn-reg { background: #e2e8f0; color: #1a202c; }
-  #authErr { color: #e53e3e; font-size: 14px; font-weight: bold; margin: 0; min-height: 20px; }
 </style>
 <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -91,59 +51,80 @@
 
 <!-- MÀN HÌNH ĐĂNG NHẬP -->
 <div id="authBox">
-  <h2 style="text-align:center; font-size: 24px; margin-bottom: 20px;">Đăng Nhập</h2>
+  <h2 style="text-align:center; color:#176a36">Đăng Nhập</h2>
   <input id="u" placeholder="Tên tài khoản">
   <input id="p" type="password" placeholder="Mật khẩu">
   <button onclick="doLogin()">Vào Game</button>
-  <button class="btn-reg" onclick="doRegister()">Tạo Tài Khoản Mới</button>
-  <p id="authErr"></p>
+  <button style="background:#ccc; color:#000" onclick="doRegister()">Tạo Tài Khoản</button>
+  <p id="authErr" style="color:red; font-weight:bold"></p>
 </div>
 
-<!-- GIAO DIỆN GAME GỐC CỦA BẠN -->
+<!-- GAME -->
 <div id="gameArea" style="display:none">
-  <h1>🌻 Nông Trại Tuấn Pro</h1>
-  
+  <h1>🌻 NÔNG TRẠI TUẤN PRO</h1>
+
   <div class="stats">
-    <div>💰 Xu: <span id="coinValue">0</span></div>
+    <div>🪙 Xu: <span id="coins">0</span></div>
+    <div>💧 Nước: <span id="water">5</span></div>
+    <div>⭐ Cấp: <span id="level">1</span></div>
+    <div>✨ EXP: <span id="xp">0</span></div>
   </div>
 
   <div class="garden-wrap">
-    <div class="garden-title">KHU VƯỜN CỦA BẠN</div>
+    <div class="garden-title">🚜 NÔNG TRẠI CỦA BẠN</div>
     <div id="garden"></div>
   </div>
+
+  <p id="message">Chọn hạt giống và chạm vào ô đất để trồng!</p>
+
+  <div class="toolbar">
+    <button class="tool-btn" onclick="toggleShop()">
+      <span style="font-size: 22px">🌱</span>
+      <span>Cửa hàng</span>
+    </button>
+  </div>
+
+  <div class="gui-panel" id="shopPanel">
+    <div class="gui-inner">
+      <h2>🌱 Cửa hàng hạt giống</h2>
+      <div class="seed-grid" id="shopList"></div>
+    </div>
+  </div>
 </div>
+
+<div id="toast"></div>
 
 <script>
 const $ = id => document.getElementById(id);
 let socket = null;
-let myCoins = 0;
-let myPlots = [];
-let selectedCrop = 'carrot'; // Mặc định trồng cà rốt
+let myData = { coins: 0, water: 5, level: 1, xp: 0, plots: [] };
+let selectedCrop = 'carrot';
 
-// Cấu hình hiển thị cây (khớp với server)
-const CROPS_CLIENT = { 
-  carrot: { emoji: '🥕' }, 
-  corn: { emoji: '🌽' }, 
-  tomato: { emoji: '🍅' } 
+const CROPS_CONFIG = {
+  carrot: { name: 'Cà rốt', emoji: '🥕', cost: 10, grow: 30000 },
+  corn: { name: 'Bắp', emoji: '🌽', cost: 25, grow: 90000 },
+  tomato: { name: 'Cà chua', emoji: '🍅', cost: 50, grow: 180000 },
+  strawberry: { name: 'Dâu tây', emoji: '🍓', cost: 100, grow: 360000 },
+  watermelon: { name: 'Dưa hấu', emoji: '🍉', cost: 250, grow: 720000 }
 };
 
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function toggleShop() { $('shopPanel').classList.toggle('open'); }
+
 async function api(url, body) {
-  const r = await fetch(url, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' }, 
-    body: JSON.stringify(body || {}) 
-  });
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error || 'Lỗi kết nối');
-  return j;
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Lỗi'); return j;
 }
 
 async function doRegister() {
   try {
     $('authErr').textContent = '';
     const j = await api('/api/register', { username: $('u').value, password: $('p').value });
-    localStorage.setItem('token', j.token); 
-    connect();
+    localStorage.setItem('token', j.token); connect();
   } catch (e) { $('authErr').textContent = e.message; }
 }
 
@@ -158,72 +139,78 @@ async function doLogin() {
 }
 
 function connect() {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-  
+  const token = localStorage.getItem('token'); if (!token) return;
   socket = io({ auth: { token } });
-  
-  socket.on('connect_error', err => { 
-    $('authErr').textContent = 'Lỗi đăng nhập!'; 
-    localStorage.removeItem('token'); 
-  });
-  
+  socket.on('connect_error', () => { $('authErr').textContent = 'Lỗi đăng nhập!'; localStorage.removeItem('token'); });
   socket.on('state', st => {
-    myCoins = st.coins; 
-    myPlots = st.plots;
-    // Ẩn đăng nhập, hiện game
-    $('authBox').style.display = 'none'; 
-    $('gameArea').style.display = '';
-    renderStats(); 
-    renderGarden();
+    myData = st;
+    $('authBox').style.display = 'none'; $('gameArea').style.display = '';
+    renderShop();
+    renderGame();
   });
-  
-  socket.on('toast', msg => alert(msg));
+  socket.on('toast', msg => showToast(msg));
 }
 
-function renderStats() { 
-  $('coinValue').textContent = myCoins; 
+function renderShop() {
+  const list = $('shopList');
+  if (list.innerHTML !== '') return;
+  for (const [key, cfg] of Object.entries(CROPS_CONFIG)) {
+    const div = document.createElement('div');
+    div.className = 'seed-card' + (key === 'carrot' ? ' selected' : '');
+    div.id = 'seed-' + key;
+    div.innerHTML = `<span class="s-icon">${cfg.emoji}</span><b>${cfg.name}</b><br><span style="color:#d97706">${cfg.cost} xu</span>`;
+    div.onclick = () => {
+      selectedCrop = key;
+      document.querySelectorAll('.seed-card').forEach(el => el.classList.remove('selected'));
+      div.classList.add('selected');
+      toggleShop();
+      showToast(`Đã chọn ${cfg.name}`);
+    };
+    list.appendChild(div);
+  }
 }
 
-function renderGarden() {
-  const g = $('garden'); 
-  g.innerHTML = '';
-  
-  myPlots.forEach(p => {
-    const btn = document.createElement('button');
-    btn.className = 'plot';
-    const cfg = p.crop ? CROPS_CLIENT[p.crop] : null;
-    
-    // Nếu có cây và đã chín
-    if (cfg && Date.now() >= p.ready_at) {
-      btn.classList.add('ready');
-    }
-    
-    // Nếu ô trống
+function renderGame() {
+  $('coins').textContent = myData.coins;
+  $('water').textContent = myData.water;
+  $('level').textContent = myData.level;
+  $('xp').textContent = myData.xp;
+
+  const g = $('garden');
+  if (g.children.length !== myData.plots.length) g.innerHTML = '';
+
+  myData.plots.forEach((p, index) => {
+    let btn = g.children[index];
+    if (!btn) { btn = document.createElement('button'); g.appendChild(btn); }
+
+    const now = Date.now();
+    const cfg = p.crop ? CROPS_CONFIG[p.crop] : null;
+
     if (!cfg) {
-      btn.textContent = '🟫';
-      btn.onclick = () => socket.emit('plant', { slot: p.slot, crop: selectedCrop });
-    } 
-    // Nếu có cây
-    else {
-      btn.innerHTML = `<span>${cfg.emoji}</span>`;
+      btn.className = 'plot';
+      btn.innerHTML = '🟫';
+      btn.onclick = () => {
+        if (myData.coins < CROPS_CONFIG[selectedCrop].cost) return showToast('Không đủ xu!');
+        socket.emit('plant', { slot: p.slot, crop: selectedCrop });
+      };
+    } else if (now >= p.ready_at) {
+      btn.className = 'plot ready';
+      btn.innerHTML = `<span class="crop-icon">${cfg.emoji}</span>`;
       btn.onclick = () => socket.emit('harvest', { slot: p.slot });
+    } else {
+      btn.className = 'plot growing';
+      const percent = Math.min(100, ((now - (p.ready_at - cfg.grow)) / cfg.grow) * 100);
+      btn.innerHTML = `
+        <span class="crop-icon" style="filter:grayscale(0.5); opacity:0.8">${cfg.emoji}</span>
+        <div class="progress-wrap"><div class="progress" style="width:${percent}%"></div></div>
+      `;
+      btn.onclick = () => showToast('Cây chưa chín, đợi chút nhé!');
     }
-    g.appendChild(btn);
   });
 }
 
-// Cập nhật lại giao diện mỗi giây để cây chín thì hiệu ứng nảy
-setInterval(() => { 
-  if (myPlots.length && $('gameArea').style.display !== 'none') {
-    renderGarden(); 
-  } 
-}, 1000);
-
-// Tự động đăng nhập lại nếu đã có token
-window.addEventListener('load', () => { 
-  if (localStorage.getItem('token')) connect(); 
-});
+setInterval(() => { if (myData.plots.length && $('gameArea').style.display !== 'none') renderGame(); }, 1000);
+window.addEventListener('load', () => { if (localStorage.getItem('token')) connect(); });
 </script>
 </body>
- </html>
+   </html>
