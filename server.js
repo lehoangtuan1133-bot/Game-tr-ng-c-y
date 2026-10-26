@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS stats (key TEXT PRIMARY KEY, value INTEGER DEFAULT 0)
 INSERT OR IGNORE INTO stats(key,value) VALUES ('total_plant',0),('total_harvest',0);
 `);
 
+// Thêm cột total_harvested (tổng số cây đã trồng) vào bảng users nếu chưa có
+try { db.exec(`ALTER TABLE users ADD COLUMN total_harvested INTEGER DEFAULT 0;`); } catch(e) {}
+
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'admin123';
 if (!db.prepare('SELECT 1 FROM users WHERE username=?').get(ADMIN_USER)) {
@@ -86,10 +89,18 @@ app.get('/api/admin/stats', adminOnly, (req, res) => {
 app.get('/api/admin/users', adminOnly, (req, res) => {
   const q = `%${(req.query.q || '').trim()}%`;
   const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = 20, offset = (page - 1) * limit;
-  const rows = db.prepare(`SELECT id,username,coins,is_admin,is_banned,created_at,last_login FROM users WHERE username LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?`).all(q, limit, offset);
+  const limit = 50, offset = (page - 1) * limit;
+  const rows = db.prepare(`SELECT id,username,coins,is_admin,is_banned,created_at,last_login,total_harvested FROM users WHERE username LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?`).all(q, limit, offset);
   const total = db.prepare('SELECT COUNT(*) c FROM users WHERE username LIKE ?').get(q).c;
-  res.json({ total, page, limit, rows: rows.map(r => ({ ...r, online: online.has(r.id) })) });
+  
+  // Tính Level dựa trên số cây đã thu hoạch (10 cây = 1 cấp)
+  const rowsWithLevel = rows.map(r => ({
+    ...r,
+    level: Math.floor((r.total_harvested || 0) / 10) + 1,
+    online: online.has(r.id)
+  }));
+
+  res.json({ total, page, limit, rows: rowsWithLevel });
 });
 
 app.post('/api/admin/users/:id/ban', adminOnly, (req, res) => {
@@ -104,18 +115,26 @@ app.post('/api/admin/users/:id/ban', adminOnly, (req, res) => {
   res.json({ ok: true, banned: !!banned });
 });
 
-// TÍNH NĂNG MỚI: ADMIN SỬA XU NGƯỜI CHƠI
-app.post('/api/admin/users/:id/coins', adminOnly, (req, res) => {
+// ADMIN TẶNG XU (Cộng thêm tiền)
+app.post('/api/admin/users/:id/addcoins', adminOnly, (req, res) => {
+  const id = +req.params.id;
+  const amount = parseInt(req.body.amount);
+  if (isNaN(amount)) return res.status(400).json({ error: 'Số xu không hợp lệ' });
+
+  db.prepare('UPDATE users SET coins = coins + ? WHERE id=?').run(amount, id);
+  io.to(`u:${id}`).emit('state', getState(id));
+  res.json({ ok: true });
+});
+
+// ADMIN SỬA XU (Ghi đè số tiền)
+app.post('/api/admin/users/:id/setcoins', adminOnly, (req, res) => {
   const id = +req.params.id;
   const coins = parseInt(req.body.coins);
   if (isNaN(coins) || coins < 0) return res.status(400).json({ error: 'Số xu không hợp lệ' });
 
-  db.prepare('UPDATE users SET coins=? WHERE id=?').run(coins, id);
-  
-  // Cập nhật realtime cho người chơi nếu họ đang online
+  db.prepare('UPDATE users SET coins = ? WHERE id=?').run(coins, id);
   io.to(`u:${id}`).emit('state', getState(id));
-  
-  res.json({ ok: true, coins });
+  res.json({ ok: true });
 });
 
 const server = http.createServer(app);
@@ -164,7 +183,8 @@ io.on('connection', socket => {
     if (Date.now() < p.ready_at) return socket.emit('toast', 'Chưa chín!');
     const cfg = CROPS[p.crop];
     db.transaction(() => {
-      db.prepare('UPDATE users SET coins=coins+? WHERE id=?').run(cfg.sell, uid);
+      // Cập nhật: Cộng xu + Tăng số cây đã thu hoạch (total_harvested)
+      db.prepare('UPDATE users SET coins=coins+?, total_harvested=total_harvested+1 WHERE id=?').run(cfg.sell, uid);
       db.prepare('UPDATE plots SET crop=NULL,planted_at=NULL,ready_at=NULL WHERE user_id=? AND slot=?').run(uid, slot);
       db.prepare("UPDATE stats SET value=value+1 WHERE key='total_harvest'").run();
     })();
