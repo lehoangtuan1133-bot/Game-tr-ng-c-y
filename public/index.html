@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌻 Nông Trại Tuấn Pro</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; padding: 16px 16px 90px; text-align: center; font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh; color: #e8f5e9; user-select: none;
+    background: linear-gradient(180deg, #ffffff 0%, #d8d8d8 20%, #8a8a8a 45%, #3a3a3a 70%, #0a0a0a 100%);
+    background-attachment: fixed; position: relative; overflow-x: hidden;
+  }
+  body > * { position: relative; z-index: 1; }
+  h1 { color: #fff; text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 24px rgba(255,255,255,.5); margin: 8px 0 16px; font-size: clamp(22px, 6vw, 34px); }
+  .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .stats div { background: rgba(255,255,255,.95); color: #1a1a1a; padding: 10px 16px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 3px 0 rgba(0,0,0,.5); }
+  .garden-wrap { max-width: 480px; margin: 0 auto 16px; padding: 18px 12px; background: linear-gradient(135deg, #7cc47f, #4ea65a 60%, #3d8f4a); border-radius: 24px; box-shadow: 0 10px 28px rgba(0,0,0,.6); position: relative; }
+  #garden { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; max-width: 400px; margin: 0 auto; position: relative; z-index: 1; }
+  .plot { aspect-ratio: 1; min-height: 96px; background: radial-gradient(circle at 30% 25%, #b98253 0%, transparent 55%), linear-gradient(160deg, #b07a45 0%, #8a5228 55%, #6b3f1e 100%); border: 4px solid #5a3417; border-radius: 18px; font-size: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28); }
+  .plot.ready { border-color: #ffd257; animation: bounce .8s infinite alternate; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), 0 0 22px rgba(255,210,87,.95); }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-7px); } }
+  
+  /* Auth box */
+  #authBox { max-width: 340px; margin: 40px auto; background: #fff; color: #111; padding: 20px; border-radius: 16px; box-shadow: 0 8px 24px #0006; }
+  #authBox h2 { color: #176a36; margin-top: 0; }
+  #authBox input { width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 8px; }
+  #authBox button { width: 100%; padding: 12px; background: #2e9e4f; color: #fff; border: 0; border-radius: 10px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
+  #authBox .btn-reg { background: #eee; color: #333; }
+  #authErr { color: #c00; font-size: 14px; }
+</style>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div id="authBox">
+  <h2>Đăng nhập</h2>
+  <input id="u" placeholder="Tên tài khoản">
+  <input id="p" type="password" placeholder="Mật khẩu">
+  <button onclick="doLogin()">Vào game</button>
+  <button class="btn-reg" onclick="doRegister()">Tạo tài khoản</button>
+  <p id="authErr"></p>
+</div>
+
+<div id="gameArea" style="display:none">
+  <h1>🌻 Nông Trại Tuấn Pro</h1>
+  <div class="stats">
+    <div>💰 Xu: <span id="coinValue">0</span></div>
+  </div>
+  <div class="garden-wrap">
+    <div id="garden"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let socket = null;
+let myCoins = 0;
+let myPlots = [];
+let selectedCrop = 'carrot';
+const CROPS_CLIENT = { carrot: { emoji: '🥕' }, corn: { emoji: '🌽' }, tomato: { emoji: '🍅' } };
+
+async function api(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error || 'Lỗi');
+  return j;
+}
+
+async function doRegister() {
+  try {
+    const j = await api('/api/register', { username: $('u').value, password: $('p').value });
+    localStorage.setItem('token', j.token); connect();
+  } catch (e) { $('authErr').textContent = e.message; }
+}
+
+async function doLogin() {
+  try {
+    const j = await api('/api/login', { username: $('u').value, password: $('p').value });
+    localStorage.setItem('token', j.token);
+    if (j.isAdmin) { location.href = '/admin.html'; return; }
+    connect();
+  } catch (e) { $('authErr').textContent = e.message; }
+}
+
+function connect() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  socket = io({ auth: { token } });
+  socket.on('connect_error', err => { $('authErr').textContent = 'Lỗi đăng nhập!'; localStorage.removeItem('token'); });
+  socket.on('state', st => {
+    myCoins = st.coins; myPlots = st.plots;
+    $('authBox').style.display = 'none'; $('gameArea').style.display = '';
+    renderStats(); renderGarden();
+  });
+  socket.on('toast', msg => alert(msg));
+}
+
+function renderStats() { $('coinValue').textContent = myCoins; }
+
+function renderGarden() {
+  const g = $('garden'); g.innerHTML = '';
+  myPlots.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'plot';
+    const cfg = p.crop ? CROPS_CLIENT[p.crop] : null;
+    if (cfg && Date.now() >= p.ready_at) btn.classList.add('ready');
+    if (!cfg) {
+      btn.textContent = '🟫';
+      btn.onclick = () => socket.emit('plant', { slot: p.slot, crop: selectedCrop });
+    } else {
+      btn.innerHTML = `<span>${cfg.emoji}</span>`;
+      btn.onclick = () => socket.emit('harvest', { slot: p.slot });
+    }
+    g.appendChild(btn);
+  });
+}
+
+setInterval(() => { if (myPlots.length) renderGarden(); }, 1000);
+window.addEventListener('load', () => { if (localStorage.getItem('token')) connect(); });
+</script>
+</body>
+  </html>
