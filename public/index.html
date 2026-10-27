@@ -5,21 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🌻 Nông Trại Tuấn Pro</title>
 <style>
-  /* GIỮ NGUYÊN TOÀN BỘ CSS CỦA BẠN */
+  /* ================= CSS GỐC CỦA BẠN ================= */
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 16px 16px 90px; text-align: center; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; color: #e8f5e9; user-select: none; background: linear-gradient(180deg, #ffffff 0%, #d8d8d8 20%, #8a8a8a 45%, #3a3a3a 70%, #0a0a0a 100%); background-attachment: fixed; position: relative; overflow-x: hidden; }
   body > * { position: relative; z-index: 1; }
   h1 { color: #ffffff; text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 24px rgba(255,255,255,.5); margin: 8px 0 16px; font-size: clamp(22px, 6vw, 34px); letter-spacing: 1px; animation: titleGlow 3s ease-in-out infinite alternate; }
   @keyframes titleGlow { from { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 12px rgba(255,255,255,.3); } to { text-shadow: 2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4), 0 0 28px rgba(255,255,255,.8); } }
   h2 { margin: 8px 0; font-size: 18px; color: #176a36; }
+
+  /* THANH CHỈ SỐ */
   .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
   .stats div { background: rgba(255,255,255,.95); color: #1a1a1a; padding: 10px 16px; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 3px 0 rgba(0,0,0,.5), 0 0 12px rgba(255,255,255,.15); border: 1px solid rgba(0,0,0,.1); }
   .stats .flash { animation: flash .4s; }
   @keyframes flash { 0% { background: rgba(255,255,255,.95); } 40% { background: #ffe680; transform: scale(1.12); } 100% { background: rgba(255,255,255,.95); } }
+
+  /* KHU VƯỜN */
   .garden-wrap { max-width: 480px; margin: 0 auto 16px; padding: 18px 12px; background: linear-gradient(135deg, #7cc47f, #4ea65a 60%, #3d8f4a); border-radius: 24px; box-shadow: 0 10px 28px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.3), inset 0 0 0 3px rgba(255,255,255,.25), inset 0 -8px 0 rgba(0,0,0,.15); position: relative; }
   .garden-wrap::before { content: ""; position: absolute; inset: 8px; border: 2px dashed rgba(255,255,255,.4); border-radius: 18px; pointer-events: none; }
   .garden-title { color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,.5); margin-bottom: 12px; position: relative; z-index: 1; }
   #garden { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; justify-content: center; max-width: 400px; margin: 0 auto; position: relative; z-index: 1; }
+
   .plot { aspect-ratio: 1; min-height: 96px; background: radial-gradient(circle at 30% 25%, #b98253 0%, transparent 55%), linear-gradient(160deg, #b07a45 0%, #8a5228 55%, #6b3f1e 100%); border: 4px solid #5a3417; border-radius: 18px; font-size: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; transition: transform .12s, box-shadow .25s, border-color .25s; padding: 0; color: #fff; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), inset 0 4px 0 rgba(255,255,255,.12), 0 6px 12px rgba(0,0,0,.5); touch-action: manipulation; }
   .plot::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(0,0,0,.18) 1px, transparent 1.5px), radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.5px); background-size: 14px 14px, 20px 20px; background-position: 0 0, 7px 7px; pointer-events: none; opacity: .8; }
   .plot.ready { border-color: #ffd257; animation: bounce .8s infinite alternate; box-shadow: inset 0 -8px 0 rgba(0,0,0,.28), 0 0 22px rgba(255,210,87,.95), 0 0 0 3px rgba(255,230,128,.6); }
@@ -35,53 +40,79 @@
   .plot.watering::after { content: "💧"; position: absolute; top: 4px; right: 6px; font-size: 24px; animation: waterDrop .9s ease-out forwards; pointer-events: none; }
   @keyframes waterDrop { 0% { opacity: 0; transform: translateY(-10px) scale(.5); } 40% { opacity: 1; transform: translateY(0) scale(1.2); } 100% { opacity: 0; transform: translateY(20px) scale(.8); } }
   .plot.fertilizing::after { content: "💩"; position: absolute; top: 4px; right: 6px; font-size: 24px; animation: waterDrop .9s ease-out forwards; pointer-events: none; }
+
+  /* THANH CÔNG CỤ */
   .toolbar { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 480px; margin: 0 auto 16px; }
   .tool-btn { flex: 1 1 0; min-width: 100px; padding: 14px 10px; border: none; border-radius: 16px; background: linear-gradient(180deg, #3aa85c, #278746); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 0 #1b5c30, 0 8px 16px rgba(0,0,0,.4); transition: transform .12s, box-shadow .12s, filter .2s; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .tool-btn .tool-emoji { font-size: 22px; }
+  .tool-btn:hover { filter: brightness(1.1); }
   .tool-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #1b5c30, 0 2px 6px rgba(0,0,0,.3); }
   .tool-btn.active { background: linear-gradient(180deg, #f5b93c, #e8a726); box-shadow: 0 4px 0 #b17c14, 0 8px 16px rgba(0,0,0,.4); }
+
+  /* GUI PANEL */
   .gui-panel { max-width: 520px; margin: 0 auto; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .4s ease, opacity .3s ease, margin .3s; }
   .gui-panel.open { max-height: 2000px; opacity: 1; margin-bottom: 16px; }
   .gui-inner { background: rgba(255,255,255,.97); border-radius: 20px; padding: 16px; border: 2px solid rgba(0,0,0,.15); box-shadow: 0 8px 24px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.1); text-align: center; color: #1a1a1a; }
+  .gui-inner h2 { margin-top: 0; color: #176a36; }
+
   .tabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0; }
   .tab { padding: 8px 12px; border-radius: 10px; background: #e4f4d7; border: 2px solid #cde3b8; cursor: pointer; font-weight: 700; font-size: 13px; color: #1a1a1a; transition: all .15s; }
+  .tab:hover { background: #d4ebc2; }
   .tab.active { background: #278746; color: #fff; border-color: #1b5c30; transform: translateY(-2px); box-shadow: 0 3px 0 #1b5c30; }
+
   .seed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; max-height: 500px; overflow-y: auto; padding: 4px; }
   .seed-card { background: #fff; border: 2px solid #cde3b8; border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; font-size: 12px; color: #1a1a1a; transition: transform .12s, box-shadow .12s, border-color .2s; position: relative; }
+  .seed-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.25); border-color: #ffd257; }
   .seed-card:active { transform: scale(.96); }
   .seed-card.disabled { opacity: .45; filter: grayscale(.6); cursor: not-allowed; }
+  .seed-card.selected { outline: 3px solid #ffd257; border-color: #e8a726; transform: translateY(-2px); }
   .seed-card .s-icon { font-size: 26px; display: block; line-height: 1; margin-bottom: 4px; }
   .seed-card .s-name { font-weight: 800; color: #176a36; display: block; margin-bottom: 2px; }
   .seed-card .s-info { font-size: 10.5px; color: #5a7a5e; line-height: 1.3; }
   .seed-card .s-tier { position: absolute; top: 3px; right: 3px; font-size: 9px; padding: 1px 4px; border-radius: 6px; font-weight: 800; color: #fff; }
   .tier-common  { background: #9bb8a5; } .tier-uncommon{ background: #4ea65a; } .tier-rare    { background: #3a89d8; } .tier-epic    { background: #9b47c9; } .tier-legend  { background: linear-gradient(45deg, #e8a726, #e85d26); }
+
   .item { display: inline-flex; align-items: center; gap: 6px; background: #e4f4d7; color: #1a1a1a; padding: 12px 14px; margin: 5px; cursor: pointer; border-radius: 12px; font-weight: 700; font-size: 14px; border: 2px dashed #9ccf7a; transition: transform .12s, box-shadow .12s, opacity .2s; position: relative; }
+  .item:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,.2); }
   .item:active { transform: scale(.96); }
   .item.disabled { opacity: .45; filter: grayscale(.6); cursor: not-allowed; }
   .item.selected { outline: 3px solid #ffd257; transform: translateY(-3px); }
+
   button:not(.tool-btn):not(#codeButton):not(.tab):not(#soundToggle) { padding: 10px 14px; margin: 5px; border: none; border-radius: 12px; background: #278746; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 3px 0 #1b5c30; transition: transform .1s, box-shadow .1s, background .2s; font-family: inherit; }
+  button:not(.tool-btn):not(#codeButton):not(.tab):not(#soundToggle):hover { background: #2f9c52; }
   button:not(.tool-btn):not(#codeButton):not(.tab):not(#soundToggle):active { transform: translateY(3px); box-shadow: 0 0 0 #1b5c30; }
   button.gold { background: #e8a726; box-shadow: 0 3px 0 #b17c14; }
+  button.gold:hover { background: #f5b93c; }
+
   #message { min-height: 24px; font-weight: 700; color: #ffffff; background: rgba(0,0,0,.7); display: inline-block; padding: 8px 18px; border-radius: 20px; transition: transform .2s; margin: 8px 0 16px; font-size: 15px; border: 1px solid rgba(255,255,255,.15); box-shadow: 0 4px 12px rgba(0,0,0,.4); }
   #message.pop { animation: pop .35s; }
   @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); color: #ffe680; } 100% { transform: scale(1); } }
+
   #codeButton, #soundToggle { position: fixed; bottom: 14px; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; padding: 0; z-index: 50; border: none; color: #fff; cursor: pointer; transition: transform .1s, box-shadow .1s; }
   #codeButton { right: 14px; background: #278746; box-shadow: 0 4px 0 #1b5c30, 0 8px 16px rgba(0,0,0,.5); }
   #soundToggle { right: 80px; background: #3a89d8; box-shadow: 0 4px 0 #2864a0, 0 8px 16px rgba(0,0,0,.5); font-size: 22px; }
   #codeButton:active, #soundToggle:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
   #codeBox { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
   #codeBox.show { display: flex; animation: fadeIn .2s; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
   .code-panel { background: #fff9e8; border-radius: 20px; padding: 20px; max-width: 340px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.6), 0 0 0 3px rgba(255,255,255,.2); animation: slideUp .25s; max-height: 90vh; overflow-y: auto; color: #1a1a1a; }
   @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
   #codeInput { width: 100%; padding: 12px; border: 2px solid #cde3b8; border-radius: 12px; font-size: 16px; margin: 10px 0; font-family: inherit; outline: none; text-align: center; color: #1a1a1a; background: #fff; }
   #codeInput:focus { border-color: #278746; }
   #codeMessage { font-weight: 700; min-height: 20px; }
+
   .float-coin { position: fixed; font-weight: 900; font-size: 20px; color: #ffd257; text-shadow: 1px 1px 0 #000, 2px 2px 0 rgba(0,0,0,.5), 0 0 12px rgba(255,210,87,.8); pointer-events: none; z-index: 999; animation: floatUp 1s ease-out forwards; }
   @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(1.5); } }
+
   #toast { position: fixed; top: 14px; left: 50%; transform: translate(-50%, -120%); background: #176a36; color: #fff; padding: 12px 20px; border-radius: 30px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.2); transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 200; max-width: 90vw; }
   #toast.show { transform: translate(-50%, 0); }
   #toast.error { background: #c0392b; }
+  #toast.success { background: #1e8a45; }
+
+  /* BẢNG NHIỆM VỤ */
   .quest-content { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; }
   .quest-title { color: #176a36; font-weight: 900; font-size: 18px; }
   .quest-desc { font-size: 15px; color: #555; }
@@ -89,6 +120,8 @@
   .btn-claim { background: #f1c40f; color: #000; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 900; font-size: 16px; cursor: pointer; box-shadow: 0 4px 0 #f39c12; transition: 0.1s; margin-top: 10px; }
   .btn-claim:active { transform: translateY(4px); box-shadow: none; }
   .btn-claim:disabled { background: #bdc3c7; box-shadow: 0 4px 0 #95a5a6; color: #7f8c8d; cursor: not-allowed; }
+
+  /* MODAL CHUNG */
   .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
   .modal.show { display: flex; }
   .modal-box { background: #fff; color: #333; border-radius: 20px; padding: 20px; width: 100%; max-width: 350px; position: relative; animation: popIn 0.3s; }
@@ -99,17 +132,21 @@
   .price-up { color: #2ecc71; font-weight: bold; }
   .price-down { color: #e74c3c; font-weight: bold; }
   .btn-sell { background: #2ecc71; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+
+  /* VÒNG QUAY */
   .wheel-container { position: relative; width: 280px; height: 280px; margin: 20px auto; border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
   .wheel-pointer { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 40px; z-index: 10; color: #e74c3c; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1); }
   .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #e74c3c; cursor: pointer; border: 4px solid #e74c3c; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 5; user-select: none; }
   .wheel-center:active { transform: translate(-50%, -50%) scale(0.95); }
+
+  /* POPUP 5 PHÚT */
   #specialPopup { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
   .special-box { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #333; border-radius: 20px; padding: 30px; max-width: 350px; text-align: center; position: relative; }
   .special-box h2 { color: #c0392b; margin-top: 0; }
   #closePopupBtn { position: absolute; top: 10px; right: 15px; font-size: 30px; color: #333; cursor: pointer; font-weight: bold; padding: 5px; line-height: 1; }
-  
-  /* LOGIN BOX */
+
+  /* MÀN HÌNH ĐĂNG NHẬP */
   #authBox { position: fixed; inset: 0; background: linear-gradient(180deg, #1a1a2e, #16213e); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
   .auth-inner { background: #fff; padding: 30px 20px; border-radius: 20px; width: 100%; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .auth-inner h2 { color: #176a36; margin-top: 0; }
@@ -244,8 +281,12 @@
 
 <div id="toast"></div>
 
+<!-- TRÌNH PHÁT NHẠC YOUTUBE -->
+<div id="ytPlayer" style="position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px;"></div>
+<button id="musicToggleBtn" style="position: fixed; bottom: 14px; left: 14px; border-radius: 50%; width: 56px; height: 56px; font-size: 24px; z-index: 50; border: none; background: #c0392b; color: #fff; box-shadow: 0 4px 0 #7f1d1d; cursor: pointer; transition: transform 0.1s;">🎵</button>
+
 <script>
-// TOÀN BỘ DATA VÀ LOGIC CLIENT ĐÃ ĐƯỢC KẾT NỐI SOCKET
+// ================= KẾT NỐI ONLINE =================
 const CROPS = {
   carrot:{icon:"🥕",time:8000,price:3,sell:7,name:"Cà rốt",tier:"common"}, potato:{icon:"🥔",time:9000,price:4,sell:9,name:"Khoai tây",tier:"common"}, corn:{icon:"🌽",time:10000,price:5,sell:11,name:"Ngô",tier:"common"}, tomato:{icon:"🍅",time:11000,price:6,sell:13,name:"Cà chua",tier:"common"}, cabbage:{icon:"🥬",time:12000,price:6,sell:14,name:"Bắp cải",tier:"common"}, cucumber:{icon:"🥒",time:10000,price:5,sell:12,name:"Dưa leo",tier:"common"}, eggplant:{icon:"🍆",time:13000,price:7,sell:16,name:"Cà tím",tier:"common"}, pepper:{icon:"🌶️",time:12000,price:7,sell:15,name:"Ớt",tier:"common"}, onion:{icon:"🧅",time:11000,price:6,sell:13,name:"Hành tây",tier:"common"}, garlic:{icon:"🧄",time:10000,price:5,sell:12,name:"Tỏi",tier:"common"}, broccoli:{icon:"🥦",time:13000,price:8,sell:17,name:"Bông cải",tier:"common"}, mushroom:{icon:"🍄",time:9000,price:4,sell:10,name:"Nấm",tier:"common"}, peanut:{icon:"🥜",time:11000,price:6,sell:13,name:"Đậu phộng",tier:"common"}, rice:{icon:"🌾",time:12000,price:6,sell:14,name:"Lúa",tier:"common"}, wheat:{icon:"🌿",time:11000,price:5,sell:12,name:"Lúa mì",tier:"common"}, lettuce:{icon:"🥗",time:10000,price:5,sell:11,name:"Xà lách",tier:"common"}, radish:{icon:"🌱",time:9000,price:4,sell:9,name:"Củ cải",tier:"common"}, pumpkin:{icon:"🎃",time:14000,price:8,sell:18,name:"Bí ngô",tier:"common"}, melon:{icon:"🍈",time:13000,price:7,sell:16,name:"Dưa gang",tier:"common"}, banana:{icon:"🍌",time:12000,price:6,sell:14,name:"Chuối",tier:"common"},
   strawberry:{icon:"🍓",time:18000,price:10,sell:25,name:"Dâu tây",tier:"uncommon"}, grape:{icon:"🍇",time:20000,price:12,sell:28,name:"Nho",tier:"uncommon"}, apple:{icon:"🍎",time:22000,price:14,sell:32,name:"Táo",tier:"uncommon"}, orange:{icon:"🍊",time:21000,price:13,sell:30,name:"Cam",tier:"uncommon"}, lemon:{icon:"🍋",time:19000,price:11,sell:26,name:"Chanh",tier:"uncommon"}, pear:{icon:"🍐",time:20000,price:12,sell:28,name:"Lê",tier:"uncommon"}, peach:{icon:"🍑",time:21000,price:13,sell:30,name:"Đào",tier:"uncommon"}, cherry:{icon:"🍒",time:19000,price:11,sell:26,name:"Anh đào",tier:"uncommon"}, pineapple:{icon:"🍍",time:23000,price:15,sell:34,name:"Dứa",tier:"uncommon"}, watermelon:{icon:"🍉",time:24000,price:16,sell:36,name:"Dưa hấu",tier:"uncommon"}, kiwi:{icon:"🥝",time:22000,price:14,sell:32,name:"Kiwi",tier:"uncommon"}, coconut:{icon:"🥥",time:23000,price:15,sell:34,name:"Dừa",tier:"uncommon"}, avocado:{icon:"🥑",time:20000,price:12,sell:28,name:"Bơ",tier:"uncommon"}, mango:{icon:"🥭",time:22000,price:14,sell:32,name:"Xoài",tier:"uncommon"}, blueberry:{icon:"🫐",time:21000,price:13,sell:30,name:"Việt quất",tier:"uncommon"}, olives:{icon:"🫒",time:20000,price:12,sell:28,name:"Ô liu",tier:"uncommon"}, sweetpotato:{icon:"🍠",time:19000,price:11,sell:26,name:"Khoai lang",tier:"uncommon"}, chili:{icon:"🌶️",time:18000,price:10,sell:24,name:"Ớt cay",tier:"uncommon"}, bean:{icon:"🫘",time:20000,price:12,sell:28,name:"Đậu",tier:"uncommon"}, chestnut:{icon:"🌰",time:21000,price:13,sell:30,name:"Hạt dẻ",tier:"uncommon"},
@@ -294,7 +335,7 @@ const SFX = {
 };
 function toggleSound() { soundOn = !soundOn; initAudio(); $("soundToggle").textContent = soundOn ? "🔊" : "🔇"; if (soundOn) SFX.click(); }
 
-// NHIỆM VỤ (Lưu tạm ở Client cho đơn giản)
+// NHIỆM VỤ
 const QUEST_POOL = [
   { type: 'harvest', target: 5, title: 'Thu hoạch 5 cây', rCoins: 500, rXp: 20 },
   { type: 'harvest', target: 10, title: 'Thu hoạch 10 cây', rCoins: 2000, rXp: 50 },
@@ -320,11 +361,13 @@ function updateQuestUI() {
 }
 function claimQuest() {
   if (currentQuest.claimed || currentQuest.progress < currentQuest.target) return;
-  // Vì đây là bản online, nhận thưởng sẽ gửi Socket
-  socket.emit('adminGive', { type: 'coins', amount: currentQuest.rCoins }); // Tạm dùng quyền admin (nếu có) hoặc server API
-  // Thực tế client không thể tự cộng tiền, cần viết API server. Ở đây tạm thời chỉ báo UI.
-  toast(`(Tính năng nhận thưởng sẽ đồng bộ server sau)`);
-  currentQuest.claimed = true; updateQuestUI(); setTimeout(generateQuest, 3000);
+  socket.emit('questReward', { coins: currentQuest.rCoins, xp: currentQuest.rXp });
+  currentQuest.claimed = true; SFX.buy(); toast(`Nhận thưởng thành công!`);
+  updateQuestUI(); setTimeout(generateQuest, 3000);
+}
+function updateQuestProgress(type, amount) {
+  if (currentQuest.claimed || currentQuest.type !== type) return;
+  currentQuest.progress += amount; updateQuestUI();
 }
 
 // VÒNG QUAY
@@ -354,7 +397,7 @@ function showWheel() { initAudio(); SFX.click(); $('wheelModal').classList.add('
 function spinWheel() {
   if (isSpinning) return;
   if (freeSpins > 0) { freeSpins--; toast(`Dùng lượt Free (Còn ${freeSpins})`); }
-  else { if (myData.coins < 50) { SFX.error(); return toast('Không đủ 50 Xu!'); } socket.emit('buyWater'); /* Tạm trừ tiền */ }
+  else { if (myData.coins < 50) { SFX.error(); return toast('Không đủ 50 Xu!'); } socket.emit('spinWheel'); }
   
   isSpinning = true; $('wheelResult').textContent = "Đang quay...";
   const winIndex = Math.floor(Math.random() * numPrizes);
@@ -364,9 +407,7 @@ function spinWheel() {
   
   setTimeout(() => {
     isSpinning = false; const prize = WHEEL_PRIZES[winIndex];
-    // Tạm báo kết quả, thực tế cần API Server để cộng
-    $('wheelResult').textContent = `🎉 Nhận ${prize.label}`;
-    SFX.win(); 
+    $('wheelResult').textContent = `🎉 Nhận ${prize.label}`; SFX.win();
   }, 4000);
 }
 
@@ -384,8 +425,7 @@ function renderSeedGrid() {
       if (myData.coins < c.price) { SFX.error(); return toast("Không đủ xu!"); }
       const emptyIdx = myData.plots.findIndex(p => p === null);
       if (emptyIdx === -1) { SFX.error(); return toast("Vườn đã đầy!"); }
-      socket.emit('plant', { slot: emptyIdx, crop: key }); 
-      closeGUI();
+      socket.emit('plant', { slot: emptyIdx, crop: key }); closeGUI();
     };
     grid.appendChild(card);
   });
@@ -417,39 +457,26 @@ function openMarket(slotIdx) {
   `;
   $('marketModal').classList.add('show');
 }
-function sellHarvest(slotIdx) {
-  socket.emit('harvest', { slot: slotIdx });
-  closeModal('marketModal');
-}
+function sellHarvest(slotIdx) { socket.emit('harvest', { slot: slotIdx }); closeModal('marketModal'); }
 function closeModal(id) { $(id).classList.remove('show'); }
 
 // TƯƠNG TÁC
 function clickPlot(i) {
   const p = myData.plots[i];
   if (!p) { SFX.error(); return toast("Ô đất trống!"); }
-  
-  if (selectedItem === 'water') {
-    if (p.ready) return toast('Cây đã chín!');
-    socket.emit('care', { slot: i, type: 'water' }); selectedItem = null; return;
-  }
-  if (selectedItem === 'fertilizer') {
-    if (p.ready) return toast('Cây đã chín!');
-    socket.emit('care', { slot: i, type: 'fertilizer' }); selectedItem = null; return;
-  }
+  if (selectedItem === 'water') { if (p.ready) return toast('Cây đã chín!'); socket.emit('care', { slot: i, type: 'water' }); selectedItem = null; return; }
+  if (selectedItem === 'fertilizer') { if (p.ready) return toast('Cây đã chín!'); socket.emit('care', { slot: i, type: 'fertilizer' }); selectedItem = null; return; }
   if (p.pest) { socket.emit('catchPest', { slot: i }); return; }
-
   const passed = Date.now() - p.start + p.bonus;
   if (passed < p.time) { SFX.error(); return toast('Cây chưa chín!'); }
   openMarket(i);
 }
 
-// RENDER ONLINE
+// RENDER
 function render() {
   $("coins").textContent = fmt(myData.coins); $("water").textContent = fmt(myData.water);
   $("level").textContent = myData.level; $("xp").textContent = myData.xp; $("xpNext").textContent = myData.level * 100;
-
   document.querySelectorAll(".item[data-type]").forEach(el => { el.classList.toggle("selected", selectedItem === el.dataset.type); });
-
   const garden = $("garden"); garden.innerHTML = "";
   myData.plots.forEach((p, i) => {
     const b = document.createElement("div"); b.className = "plot"; b.dataset.index = i;
@@ -463,12 +490,10 @@ function render() {
     b.onclick = () => { initAudio(); clickPlot(i); };
     garden.appendChild(b);
   });
-
   $("upgradeContent").innerHTML = myData.level >= 50
     ? `<h2>🏡 Shop nâng cấp</h2><button class="gold" onclick="socket.emit('buyPlot')">Mua thêm ô đất — 100 xu</button><p style="font-size:13px;opacity:.75">Số ô hiện tại: ${myData.plot_count}</p>`
     : `<span class="locked" style="opacity:.7">🔒 Shop nâng cấp mở ở Cấp 50 (Hiện tại: ${myData.level})</span>`;
 }
-
 document.querySelectorAll(".item[data-type]").forEach(el => {
   el.addEventListener("click", () => {
     initAudio(); const type = el.dataset.type;
@@ -488,11 +513,10 @@ function showCode() { initAudio(); SFX.click(); $("codeBox").classList.add("show
 function hideCode() { SFX.click(); $("codeBox").classList.remove("show"); }
 function redeemCode() {
   const code = $("codeInput").value.trim().toLowerCase(); const msg = $("codeMessage");
-  // Bản online cần Server xử lý code, tạm thời báo lỗi
-  msg.textContent = "❌ Tính năng code đang cập nhật lên server!"; msg.style.color = "#c0392b"; SFX.error();
+  socket.emit('redeemCode', { code: code });
 }
 
-// SOCKET CONNECT
+// SOCKET
 function connectSocket(token) {
   socket = io({ auth: { token } });
   socket.on('connect_error', () => { $('authMsg').textContent = 'Lỗi đăng nhập!'; localStorage.removeItem('token'); });
@@ -506,6 +530,21 @@ function connectSocket(token) {
     const rect = document.querySelector(`.plot.ready`);
     if (rect) { const r = rect.getBoundingClientRect(); floatCoin(res.reward, r.left + r.width / 2 - 20, r.top); }
     SFX.harvest();
+  });
+  socket.on('codeResult', res => {
+    const msg = $("codeMessage");
+    if (res.success) {
+      msg.textContent = res.message; msg.style.color = "#1e8a45"; SFX.win();
+      $("codeInput").value = '';
+      if (res.freeSpins) freeSpins += res.freeSpins;
+      if (res.plantCrop) {
+        const emptyIdx = myData.plots.findIndex(p => p === null);
+        if (emptyIdx !== -1) socket.emit('plant', { slot: emptyIdx, crop: res.plantCrop });
+      }
+      render();
+    } else {
+      msg.textContent = res.message; msg.style.color = "#c0392b"; SFX.error();
+    }
   });
 }
 
@@ -532,6 +571,51 @@ async function doRegister() {
   } catch (e) { $('authMsg').textContent = e.message; }
 }
 
+// ================= YOUTUBE MUSIC =================
+const YOUTUBE_PLAYLIST = ["dGYelkh2LOE", "uQKfc1cgVAg"];
+let ytPlayer, isMusicPlaying = false, currentTrackIndex = 0;
+
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('ytPlayer', {
+    height: '1', width: '1', videoId: YOUTUBE_PLAYLIST[0],
+    playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1, 'fs': 0, 'modestbranding': 1, 'origin': window.location.origin },
+    events: { 'onReady': () => {}, 'onStateChange': onPlayerStateChange, 'onError': onPlayerError }
+  });
+}
+function onPlayerStateChange(event) {
+  if (event.data == YT.PlayerState.PLAYING) {
+    isMusicPlaying = true; updateMusicBtn('⏸️', '#278746', '#1b5c30');
+  } else {
+    isMusicPlaying = false; updateMusicBtn('🎵', '#c0392b', '#7f1d1d');
+    if (event.data == 0) playNextTrack();
+  }
+}
+function onPlayerError(event) { playNextTrack(); }
+function playNextTrack() {
+  currentTrackIndex++;
+  if (currentTrackIndex >= YOUTUBE_PLAYLIST.length) currentTrackIndex = 0;
+  ytPlayer.loadVideoById(YOUTUBE_PLAYLIST[currentTrackIndex]);
+}
+function updateMusicBtn(icon, bgColor, shadowColor) {
+  const btn = document.getElementById('musicToggleBtn');
+  btn.textContent = icon; btn.style.background = bgColor; btn.style.boxShadow = `0 4px 0 ${shadowColor}`;
+}
+document.getElementById('musicToggleBtn').addEventListener('click', function() {
+  if (!ytPlayer) return;
+  this.style.transform = 'translateY(4px)'; this.style.boxShadow = 'none';
+  setTimeout(() => {
+    this.style.transform = 'translateY(0)';
+    if (isMusicPlaying) this.style.boxShadow = '0 4px 0 #1b5c30'; else this.style.boxShadow = '0 4px 0 #7f1d1d';
+  }, 100);
+  if (isMusicPlaying) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+});
+
+// ================= KHỞI TẠO =================
 window.addEventListener('load', () => {
   const token = localStorage.getItem('token');
   if (token) connectSocket(token);
