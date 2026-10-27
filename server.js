@@ -21,7 +21,6 @@ if (!db.prepare('SELECT 1 FROM users WHERE username=?').get(ADMIN_USER)) {
   db.prepare(`INSERT INTO users(username,password_hash,is_admin,created_at) VALUES (?,?,1,?)`).run(ADMIN_USER, bcrypt.hashSync(ADMIN_PASS, 10), Date.now());
 }
 
-// Toàn bộ 100 loại cây (Server cần biết để chống hack)
 const CROPS = {
   carrot:{time:8000,price:3,sell:7}, potato:{time:9000,price:4,sell:9}, corn:{time:10000,price:5,sell:11}, tomato:{time:11000,price:6,sell:13}, cabbage:{time:12000,price:6,sell:14}, cucumber:{time:10000,price:5,sell:12}, eggplant:{time:13000,price:7,sell:16}, pepper:{time:12000,price:7,sell:15}, onion:{time:11000,price:6,sell:13}, garlic:{time:10000,price:5,sell:12}, broccoli:{time:13000,price:8,sell:17}, mushroom:{time:9000,price:4,sell:10}, peanut:{time:11000,price:6,sell:13}, rice:{time:12000,price:6,sell:14}, wheat:{time:11000,price:5,sell:12}, lettuce:{time:10000,price:5,sell:11}, radish:{time:9000,price:4,sell:9}, pumpkin:{time:14000,price:8,sell:18}, melon:{time:13000,price:7,sell:16}, banana:{time:12000,price:6,sell:14},
   strawberry:{time:18000,price:10,sell:25}, grape:{time:20000,price:12,sell:28}, apple:{time:22000,price:14,sell:32}, orange:{time:21000,price:13,sell:30}, lemon:{time:19000,price:11,sell:26}, pear:{time:20000,price:12,sell:28}, peach:{time:21000,price:13,sell:30}, cherry:{time:19000,price:11,sell:26}, pineapple:{time:23000,price:15,sell:34}, watermelon:{time:24000,price:16,sell:36}, kiwi:{time:22000,price:14,sell:32}, coconut:{time:23000,price:15,sell:34}, avocado:{time:20000,price:12,sell:28}, mango:{time:22000,price:14,sell:32}, blueberry:{time:21000,price:13,sell:30}, olives:{time:20000,price:12,sell:28}, sweetpotato:{time:19000,price:11,sell:26}, chili:{time:18000,price:10,sell:24}, bean:{time:20000,price:12,sell:28}, chestnut:{time:21000,price:13,sell:30},
@@ -43,8 +42,6 @@ const verify = t => { try { return jwt.verify(t, SECRET); } catch { return null;
 function getState(userId) {
   const u = db.prepare('SELECT coins, water, fertilizer, xp, level, plot_count FROM users WHERE id=?').get(userId);
   const p = db.prepare('SELECT * FROM plots WHERE user_id=?').all(userId);
-  
-  // Khởi tạo mảng đất trống dựa trên số đất đã mua
   const plots = Array(u.plot_count).fill(null);
   p.forEach(row => {
     if(row.slot < u.plot_count) {
@@ -104,10 +101,25 @@ app.post('/api/admin/users/:id/ban', adminOnly, (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/admin/users/:id/setcoins', adminOnly, (req, res) => {
-  const id = +req.params.id; const coins = parseInt(req.body.coins);
-  db.prepare('UPDATE users SET coins=? WHERE id=?').run(coins, id);
-  io.to(`u:${id}`).emit('state', getState(id)); res.json({ ok: true });
+// API TẶNG XU / NƯỚC / EXP
+app.post('/api/admin/users/:id/give', adminOnly, (req, res) => {
+  const id = +req.params.id;
+  const { type, amount } = req.body;
+  const num = parseInt(amount);
+  if (isNaN(num)) return res.status(400).json({ error: 'Số lượng không hợp lệ' });
+
+  if (type === 'coins') db.prepare('UPDATE users SET coins = coins + ? WHERE id=?').run(num, id);
+  else if (type === 'water') db.prepare('UPDATE users SET water = water + ? WHERE id=?').run(num, id);
+  else if (type === 'xp') {
+    db.prepare('UPDATE users SET xp = xp + ? WHERE id=?').run(num, id);
+    // Cập nhật lại level nếu EXP tăng
+    const u = db.prepare('SELECT xp FROM users WHERE id=?').get(id);
+    const newLevel = 1 + Math.floor(u.xp / XP_PER_LEVEL);
+    db.prepare('UPDATE users SET level=? WHERE id=?').run(newLevel, id);
+  }
+
+  io.to(`u:${id}`).emit('state', getState(id));
+  res.json({ ok: true });
 });
 
 const server = http.createServer(app);
@@ -135,7 +147,6 @@ io.on('connection', socket => {
     const u = db.prepare('SELECT coins, plot_count FROM users WHERE id=?').get(uid);
     if (slot >= u.plot_count) return;
     if (u.coins < cfg.price) return socket.emit('toast', 'Không đủ xu!', 'error');
-    
     const now = Date.now();
     db.transaction(() => {
       db.prepare('UPDATE users SET coins = coins - ? WHERE id=?').run(cfg.price, uid);
@@ -149,7 +160,6 @@ io.on('connection', socket => {
     if (!p || !p.crop) return;
     const u = db.prepare('SELECT coins, water, fertilizer FROM users WHERE id=?').get(uid);
     const boost = type === 'water' ? WATER_BOOST : FERT_BOOST;
-
     if (type === 'water') {
       if (u.water <= 0) return socket.emit('toast', 'Hết nước!', 'error');
       db.prepare('UPDATE users SET water = water - 1 WHERE id=?').run(uid);
@@ -158,7 +168,6 @@ io.on('connection', socket => {
       else if (u.coins >= FERT_COST) db.prepare('UPDATE users SET coins = coins - ? WHERE id=?').run(FERT_COST, uid);
       else return socket.emit('toast', 'Không đủ xu mua phân!', 'error');
     }
-
     db.prepare('UPDATE plots SET ready_at = ready_at - ?, bonus = bonus + ? WHERE user_id=? AND slot=?').run(boost, boost, uid, slot);
     io.to(`u:${uid}`).emit('state', getState(uid));
     socket.emit('toast', type === 'water' ? '💧 Đã tưới nước (-5s)' : '💩 Đã bón phân (-10s)', 'success');
@@ -167,31 +176,25 @@ io.on('connection', socket => {
   socket.on('harvest', ({ slot }) => {
     const p = db.prepare('SELECT * FROM plots WHERE user_id=? AND slot=?').get(uid, slot);
     if (!p || !p.crop || Date.now() < p.ready_at) return;
-    
     const cfg = CROPS[p.crop];
     let luckMult = 1, luckLabel = "x1";
     const r = Math.random(); let acc = 0;
     for (const row of LUCK_TABLE) { acc += row.chance; if (r < acc) { luckMult = row.mult; luckLabel = `x${row.mult}`; break; } }
-
     const reward = Math.floor(cfg.sell * luckMult);
     const xpGain = 10;
-    
     db.transaction(() => {
       db.prepare('UPDATE users SET coins = coins + ?, xp = xp + ? WHERE id=?').run(reward, xpGain, uid);
       db.prepare('DELETE FROM plots WHERE user_id=? AND slot=?').run(uid, slot);
     })();
-
     const u = db.prepare('SELECT xp, level, plot_count FROM users WHERE id=?').get(uid);
     const newLevel = 1 + Math.floor(u.xp / XP_PER_LEVEL);
     let newPlotCount = u.plot_count;
     if (u.xp >= PLOT_UNLOCK_XP && u.plot_count === 1) newPlotCount = 4;
-
     if (newLevel > u.level || newPlotCount > u.plot_count) {
       db.prepare('UPDATE users SET level=?, plot_count=? WHERE id=?').run(newLevel, newPlotCount, uid);
       if (newLevel > u.level) socket.emit('toast', `⭐ LÊN CẤP ${newLevel}!`, 'success');
       if (newPlotCount > u.plot_count) socket.emit('toast', `🎉 Mở khoá thêm ô đất!`, 'success');
     }
-
     io.to(`u:${uid}`).emit('state', getState(uid));
     socket.emit('harvestResult', { reward, luckLabel, xpGain });
   });
