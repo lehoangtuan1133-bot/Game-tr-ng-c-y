@@ -28,19 +28,25 @@
   @keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
   .plot.ready .crop-icon { animation: popReady .6s ease-in-out infinite alternate; filter: drop-shadow(0 4px 8px rgba(255,210,87,.9)); }
   @keyframes popReady { from { transform: scale(1) rotate(-2deg); } to { transform: scale(1.15) rotate(2deg); } }
+  .plot.watering::after { content: "💧"; position: absolute; top: 4px; right: 6px; font-size: 24px; animation: waterDrop .9s ease-out forwards; pointer-events: none; }
+  @keyframes waterDrop { 0% { opacity: 0; transform: translateY(-10px) scale(.5); } 40% { opacity: 1; transform: translateY(0) scale(1.2); } 100% { opacity: 0; transform: translateY(20px) scale(.8); } }
+  .plot.fertilizing::after { content: "💩"; position: absolute; top: 4px; right: 6px; font-size: 24px; animation: waterDrop .9s ease-out forwards; pointer-events: none; }
   .toolbar { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 480px; margin: 0 auto 16px; }
   .tool-btn { flex: 1 1 0; min-width: 100px; padding: 14px 10px; border: none; border-radius: 16px; background: linear-gradient(180deg, #3aa85c, #278746); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 0 #1b5c30, 0 8px 16px rgba(0,0,0,.4); transition: transform .12s, box-shadow .12s, filter .2s; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .tool-btn.active { background: linear-gradient(180deg, #f5b93c, #e8a726); box-shadow: 0 4px 0 #b17c14, 0 8px 16px rgba(0,0,0,.4); }
   .gui-panel { max-width: 520px; margin: 0 auto; max-height: 0; overflow: hidden; opacity: 0; transition: max-height .4s ease, opacity .3s ease, margin .3s; }
   .gui-panel.open { max-height: 2000px; opacity: 1; margin-bottom: 16px; }
   .gui-inner { background: rgba(255,255,255,.97); border-radius: 20px; padding: 16px; border: 2px solid rgba(0,0,0,.15); box-shadow: 0 8px 24px rgba(0,0,0,.5); text-align: center; color: #1a1a1a; }
-  .seed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
-  .seed-card { background: #fff; border: 2px solid #cde3b8; border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; font-size: 12px; }
+  .seed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; max-height: 500px; overflow-y: auto; }
+  .seed-card { background: #fff; border: 2px solid #cde3b8; border-radius: 12px; padding: 8px; cursor: pointer; text-align: center; font-size: 12px; color: #1a1a1a; position: relative; }
   .seed-card.selected { outline: 3px solid #ffd257; border-color: #e8a726; }
   .seed-card .s-icon { font-size: 26px; display: block; margin-bottom: 4px; }
+  .seed-card .s-tier { position: absolute; top: 3px; right: 3px; font-size: 9px; padding: 1px 4px; border-radius: 6px; font-weight: 800; color: #fff; }
+  .tier-common { background: #9bb8a5; } .tier-uncommon{ background: #4ea65a; } .tier-rare { background: #3a89d8; } .tier-epic { background: #9b47c9; } .tier-legend { background: linear-gradient(45deg, #e8a726, #e85d26); }
   #message { min-height: 24px; font-weight: 700; color: #ffffff; background: rgba(0,0,0,.7); display: inline-block; padding: 8px 18px; border-radius: 20px; margin: 8px 0 16px; font-size: 15px; }
   #toast { position: fixed; top: 14px; left: 50%; transform: translate(-50%, -120%); background: #176a36; color: #fff; padding: 12px 20px; border-radius: 30px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.6); transition: transform .35s; z-index: 200; }
   #toast.show { transform: translate(-50%, 0); }
+  #toast.error { background: #c0392b; }
   #authBox { max-width: 340px; margin: 60px auto; background: rgba(255,255,255,0.95); color: #111; padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
   #authBox input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; }
   #authBox button { width: 100%; padding: 14px; background: #2e9e4f; color: #fff; border: 0; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
@@ -49,7 +55,7 @@
 </head>
 <body>
 
-<!-- MÀN HÌNH ĐĂNG NHẬP -->
+<!-- ĐĂNG NHẬP -->
 <div id="authBox">
   <h2 style="text-align:center; color:#176a36">Đăng Nhập</h2>
   <input id="u" placeholder="Tên tài khoản">
@@ -64,31 +70,49 @@
   <h1>🌻 NÔNG TRẠI TUẤN PRO</h1>
 
   <div class="stats">
-    <div>🪙 Xu: <span id="coins">0</span></div>
-    <div>💧 Nước: <span id="water">5</span></div>
-    <div>⭐ Cấp: <span id="level">1</span></div>
-    <div>✨ EXP: <span id="xp">0</span></div>
+    <div id="statCoins">🪙 Xu: <span id="coins">0</span></div>
+    <div id="statWater">💧 Nước: <span id="water">0</span></div>
+    <div id="statLevel">⭐ Cấp: <span id="level">1</span></div>
+    <div id="statXp">✨ EXP: <span id="xp">0</span>/<span id="xpNext">50</span></div>
   </div>
 
   <div class="garden-wrap">
     <div class="garden-title">🚜 NÔNG TRẠI CỦA BẠN</div>
     <div id="garden"></div>
   </div>
-
-  <p id="message">Chọn hạt giống và chạm vào ô đất để trồng!</p>
+  <p id="message">Chọn hạt giống và chạm vào ô đất!</p>
 
   <div class="toolbar">
-    <button class="tool-btn" onclick="toggleShop()">
-      <span style="font-size: 22px">🌱</span>
-      <span>Cửa hàng</span>
-    </button>
+    <button class="tool-btn" data-gui="seedShop" onclick="toggleGUI('seedShop', this)"><span class="tool-emoji">🌱</span><span>Cửa hàng</span></button>
+    <button class="tool-btn" data-gui="careShop" onclick="toggleGUI('careShop', this)"><span class="tool-emoji">💧</span><span>Chăm sóc</span></button>
+    <button class="tool-btn" data-gui="upgradeShop" onclick="toggleGUI('upgradeShop', this)"><span class="tool-emoji">🏡</span><span>Nâng cấp</span></button>
   </div>
 
-  <div class="gui-panel" id="shopPanel">
+  <div class="gui-panel" id="gui-seedShop">
     <div class="gui-inner">
       <h2>🌱 Cửa hàng hạt giống</h2>
-      <div class="seed-grid" id="shopList"></div>
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-tier="common" onclick="switchTab('common')">🌿 Phổ thông</div>
+        <div class="tab" data-tier="uncommon" onclick="switchTab('uncommon')">🌾 Hiếm vừa</div>
+        <div class="tab" data-tier="rare" onclick="switchTab('rare')">💠 Quý hiếm</div>
+        <div class="tab" data-tier="epic" onclick="switchTab('epic')">🔮 Cực phẩm</div>
+        <div class="tab" data-tier="legend" onclick="switchTab('legend')">👑 Huyền thoại</div>
+      </div>
+      <div class="seed-grid" id="seedGrid"></div>
     </div>
+  </div>
+
+  <div class="gui-panel" id="gui-careShop">
+    <div class="gui-inner">
+      <h2>💧 Chăm sóc cây</h2>
+      <button onclick="buyWater()">Mua 5 nước — 10 xu</button>
+      <div class="item" data-type="water">💧 Tưới nước</div>
+      <div class="item" data-type="fertilizer">💩 Phân bón — 15 xu</div>
+    </div>
+  </div>
+
+  <div class="gui-panel" id="gui-upgradeShop">
+    <div class="gui-inner" id="upgradeContent"></div>
   </div>
 </div>
 
@@ -97,23 +121,23 @@
 <script>
 const $ = id => document.getElementById(id);
 let socket = null;
-let myData = { coins: 0, water: 5, level: 1, xp: 0, plots: [] };
-let selectedCrop = 'carrot';
+let myData = { coins: 0, water: 0, fertilizer: 0, xp: 0, level: 1, plot_count: 1, plots: [] };
+let selectedItem = null;
+let currentTab = 'common';
 
-const CROPS_CONFIG = {
-  carrot: { name: 'Cà rốt', emoji: '🥕', cost: 10, grow: 30000 },
-  corn: { name: 'Bắp', emoji: '🌽', cost: 25, grow: 90000 },
-  tomato: { name: 'Cà chua', emoji: '🍅', cost: 50, grow: 180000 },
-  strawberry: { name: 'Dâu tây', emoji: '🍓', cost: 100, grow: 360000 },
-  watermelon: { name: 'Dưa hấu', emoji: '🍉', cost: 250, grow: 720000 }
+// CẤU HÌNH 100 CÂY (Lấy từ code của bạn)
+const CROPS = {
+  carrot:{icon:"🥕",time:8000,price:3,sell:7,name:"Cà rốt",tier:"common"}, potato:{icon:"🥔",time:9000,price:4,sell:9,name:"Khoai tây",tier:"common"}, corn:{icon:"🌽",time:10000,price:5,sell:11,name:"Ngô",tier:"common"}, tomato:{icon:"🍅",time:11000,price:6,sell:13,name:"Cà chua",tier:"common"}, cabbage:{icon:"🥬",time:12000,price:6,sell:14,name:"Bắp cải",tier:"common"}, cucumber:{icon:"🥒",time:10000,price:5,sell:12,name:"Dưa leo",tier:"common"}, eggplant:{icon:"🍆",time:13000,price:7,sell:16,name:"Cà tím",tier:"common"}, pepper:{icon:"🌶️",time:12000,price:7,sell:15,name:"Ớt",tier:"common"}, onion:{icon:"🧅",time:11000,price:6,sell:13,name:"Hành tây",tier:"common"}, garlic:{icon:"🧄",time:10000,price:5,sell:12,name:"Tỏi",tier:"common"}, broccoli:{icon:"🥦",time:13000,price:8,sell:17,name:"Bông cải",tier:"common"}, mushroom:{icon:"🍄",time:9000,price:4,sell:10,name:"Nấm",tier:"common"}, peanut:{icon:"🥜",time:11000,price:6,sell:13,name:"Đậu phộng",tier:"common"}, rice:{icon:"🌾",time:12000,price:6,sell:14,name:"Lúa",tier:"common"}, wheat:{icon:"🌿",time:11000,price:5,sell:12,name:"Lúa mì",tier:"common"}, lettuce:{icon:"🥗",time:10000,price:5,sell:11,name:"Xà lách",tier:"common"}, radish:{icon:"🌱",time:9000,price:4,sell:9,name:"Củ cải",tier:"common"}, pumpkin:{icon:"🎃",time:14000,price:8,sell:18,name:"Bí ngô",tier:"common"}, melon:{icon:"🍈",time:13000,price:7,sell:16,name:"Dưa gang",tier:"common"}, banana:{icon:"🍌",time:12000,price:6,sell:14,name:"Chuối",tier:"common"},
+  strawberry:{icon:"🍓",time:18000,price:10,sell:25,name:"Dâu tây",tier:"uncommon"}, grape:{icon:"🍇",time:20000,price:12,sell:28,name:"Nho",tier:"uncommon"}, apple:{icon:"🍎",time:22000,price:14,sell:32,name:"Táo",tier:"uncommon"}, orange:{icon:"🍊",time:21000,price:13,sell:30,name:"Cam",tier:"uncommon"}, lemon:{icon:"🍋",time:19000,price:11,sell:26,name:"Chanh",tier:"uncommon"}, pear:{icon:"🍐",time:20000,price:12,sell:28,name:"Lê",tier:"uncommon"}, peach:{icon:"🍑",time:21000,price:13,sell:30,name:"Đào",tier:"uncommon"}, cherry:{icon:"🍒",time:19000,price:11,sell:26,name:"Anh đào",tier:"uncommon"}, pineapple:{icon:"🍍",time:23000,price:15,sell:34,name:"Dứa",tier:"uncommon"}, watermelon:{icon:"🍉",time:24000,price:16,sell:36,name:"Dưa hấu",tier:"uncommon"}, kiwi:{icon:"🥝",time:22000,price:14,sell:32,name:"Kiwi",tier:"uncommon"}, coconut:{icon:"🥥",time:23000,price:15,sell:34,name:"Dừa",tier:"uncommon"}, avocado:{icon:"🥑",time:20000,price:12,sell:28,name:"Bơ",tier:"uncommon"}, mango:{icon:"🥭",time:22000,price:14,sell:32,name:"Xoài",tier:"uncommon"}, blueberry:{icon:"🫐",time:21000,price:13,sell:30,name:"Việt quất",tier:"uncommon"}, olives:{icon:"🫒",time:20000,price:12,sell:28,name:"Ô liu",tier:"uncommon"}, sweetpotato:{icon:"🍠",time:19000,price:11,sell:26,name:"Khoai lang",tier:"uncommon"}, chili:{icon:"🌶️",time:18000,price:10,sell:24,name:"Ớt cay",tier:"uncommon"}, bean:{icon:"🫘",time:20000,price:12,sell:28,name:"Đậu",tier:"uncommon"}, chestnut:{icon:"🌰",time:21000,price:13,sell:30,name:"Hạt dẻ",tier:"uncommon"},
+  diamond:{icon:"💎",time:40000,price:50,sell:150,name:"Hoa kim cương",tier:"rare"}, rose:{icon:"🌹",time:35000,price:40,sell:120,name:"Hoa hồng",tier:"rare"}, tulip:{icon:"🌷",time:34000,price:38,sell:115,name:"Hoa tulip",tier:"rare"}, sunflower:{icon:"🌻",time:36000,price:42,sell:125,name:"Hoa hướng dương",tier:"rare"}, hibiscus:{icon:"🌺",time:37000,price:44,sell:130,name:"Hoa dâm bụt",tier:"rare"}, cherryblossom:{icon:"🌸",time:38000,price:46,sell:135,name:"Hoa anh đào",tier:"rare"}, lotus:{icon:"🪷",time:39000,price:48,sell:140,name:"Hoa sen",tier:"rare"}, cactus:{icon:"🌵",time:42000,price:52,sell:155,name:"Xương rồng",tier:"rare"}, palm:{icon:"🌴",time:41000,price:50,sell:150,name:"Cọ",tier:"rare"}, evergreen:{icon:"🌲",time:40000,price:48,sell:145,name:"Thông",tier:"rare"}, leaf:{icon:"🍃",time:33000,price:36,sell:110,name:"Lá xanh",tier:"rare"}, maple:{icon:"🍁",time:37000,price:44,sell:130,name:"Lá phong",tier:"rare"}, clover:{icon:"🍀",time:35000,price:40,sell:120,name:"Cỏ 4 lá",tier:"rare"}, herb:{icon:"🌿",time:34000,price:38,sell:115,name:"Thảo mộc",tier:"rare"}, bamboo:{icon:"🎋",time:39000,price:46,sell:140,name:"Tre",tier:"rare"}, pine:{icon:"🎄",time:38000,price:45,sell:135,name:"Cây thông Noel",tier:"rare"}, shell:{icon:"🐚",time:36000,price:42,sell:125,name:"Vỏ sò",tier:"rare"}, coral:{icon:"🪸",time:41000,price:50,sell:150,name:"San hô",tier:"rare"}, moonflower:{icon:"🌙",time:43000,price:54,sell:160,name:"Hoa ánh trăng",tier:"rare"}, starflower:{icon:"⭐",time:44000,price:56,sell:165,name:"Hoa ngôi sao",tier:"rare"},
+  crystal:{icon:"🔮",time:60000,price:100,sell:320,name:"Pha lê",tier:"epic"}, rainbow:{icon:"🌈",time:65000,price:120,sell:380,name:"Cầu vồng",tier:"epic"}, comet:{icon:"☄️",time:70000,price:140,sell:440,name:"Sao chổi",tier:"epic"}, meteor:{icon:"🌠",time:72000,price:150,sell:470,name:"Sao băng",tier:"epic"}, planet:{icon:"🪐",time:75000,price:160,sell:500,name:"Hành tinh",tier:"epic"}, galaxy:{icon:"🌌",time:80000,price:180,sell:560,name:"Ngân hà",tier:"epic"}, sun:{icon:"☀️",time:78000,price:170,sell:530,name:"Mặt trời",tier:"epic"}, moon:{icon:"🌕",time:76000,price:165,sell:515,name:"Mặt trăng",tier:"epic"}, star:{icon:"🌟",time:74000,price:155,sell:485,name:"Ngôi sao",tier:"epic"}, lightning:{icon:"⚡",time:68000,price:135,sell:420,name:"Sấm sét",tier:"epic"}, fire:{icon:"🔥",time:66000,price:125,sell:390,name:"Lửa",tier:"epic"}, ice:{icon:"❄️",time:67000,price:130,sell:405,name:"Băng",tier:"epic"}, tornado:{icon:"🌪️",time:71000,price:145,sell:455,name:"Lốc xoáy",tier:"epic"}, volcano:{icon:"🌋",time:73000,price:152,sell:478,name:"Núi lửa",tier:"epic"}, ocean:{icon:"🌊",time:69000,price:138,sell:432,name:"Sóng biển",tier:"epic"}, earth:{icon:"🌍",time:77000,price:168,sell:522,name:"Trái đất",tier:"epic"}, aurora:{icon:"🌠",time:79000,price:175,sell:545,name:"Cực quang",tier:"epic"}, crystalball:{icon:"🔮",time:62000,price:110,sell:350,name:"Quả cầu pha lê",tier:"epic"}, magicwand:{icon:"🪄",time:63000,price:115,sell:365,name:"Đũa thần",tier:"epic"}, hourglass:{icon:"⌛",time:64000,price:118,sell:372,name:"Đồng hồ cát",tier:"epic"},
+  dragon:{icon:"🐉",time:120000,price:300,sell:1100,name:"Rồng",tier:"legend"}, phoenix:{icon:"🔥",time:125000,price:320,sell:1180,name:"Phượng hoàng",tier:"legend"}, unicorn:{icon:"🦄",time:118000,price:290,sell:1060,name:"Kỳ lân",tier:"legend"}, mermaid:{icon:"🧜",time:115000,price:280,sell:1020,name:"Nàng tiên cá",tier:"legend"}, fairy:{icon:"🧚",time:112000,price:270,sell:980,name:"Tiên",tier:"legend"}, genie:{icon:"🧞",time:116000,price:285,sell:1030,name:"Thần đèn",tier:"legend"}, angel:{icon:"👼",time:122000,price:310,sell:1120,name:"Thiên thần",tier:"legend"}, demon:{icon:"😈",time:123000,price:315,sell:1130,name:"Ác quỷ",tier:"legend"}, ghost:{icon:"👻",time:110000,price:265,sell:950,name:"Ma",tier:"legend"}, alien:{icon:"👽",time:114000,price:278,sell:1000,name:"Người ngoài hành tinh",tier:"legend"}, robot:{icon:"🤖",time:117000,price:288,sell:1040,name:"Robot",tier:"legend"}, crown:{icon:"👑",time:126000,price:330,sell:1200,name:"Vương miện",tier:"legend"}, sword:{icon:"⚔️",time:124000,price:322,sell:1160,name:"Thanh kiếm",tier:"legend"}, shield:{icon:"🛡️",time:121000,price:305,sell:1100,name:"Khiên",tier:"legend"}, orb:{icon:"🔮",time:119000,price:295,sell:1070,name:"Quả cầu",tier:"legend"}, key:{icon:"🗝️",time:113000,price:272,sell:990,name:"Chìa khóa",tier:"legend"}, potion:{icon:"🧪",time:111000,price:268,sell:970,name:"Thuốc tiên",tier:"legend"}, scroll:{icon:"📜",time:108000,price:258,sell:930,name:"Cuộn giấy",tier:"legend"}, book:{icon:"📚",time:109000,price:262,sell:940,name:"Sách cổ",tier:"legend"}, map:{icon:"🗺️",time:107000,price:255,sell:920,name:"Bản đồ kho báu",tier:"legend"}
 };
 
-function showToast(msg) {
-  const t = $('toast'); t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-function toggleShop() { $('shopPanel').classList.toggle('open'); }
+const TIER_INFO = { common:{name:"Phổ thông"}, uncommon:{name:"Hiếm vừa"}, rare:{name:"Quý hiếm"}, epic:{name:"Cực phẩm"}, legend:{name:"Huyền thoại"} };
+const XP_PER_LEVEL = 100;
+const PLOT_UNLOCK_XP = 50;
+const UPGRADE_XP = 1000;
 
 async function api(url, body) {
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
@@ -133,84 +157,4 @@ async function doLogin() {
     $('authErr').textContent = '';
     const j = await api('/api/login', { username: $('u').value, password: $('p').value });
     localStorage.setItem('token', j.token);
-    if (j.isAdmin) { location.href = '/admin.html'; return; }
-    connect();
-  } catch (e) { $('authErr').textContent = e.message; }
-}
-
-function connect() {
-  const token = localStorage.getItem('token'); if (!token) return;
-  socket = io({ auth: { token } });
-  socket.on('connect_error', () => { $('authErr').textContent = 'Lỗi đăng nhập!'; localStorage.removeItem('token'); });
-  socket.on('state', st => {
-    myData = st;
-    $('authBox').style.display = 'none'; $('gameArea').style.display = '';
-    renderShop();
-    renderGame();
-  });
-  socket.on('toast', msg => showToast(msg));
-}
-
-function renderShop() {
-  const list = $('shopList');
-  if (list.innerHTML !== '') return;
-  for (const [key, cfg] of Object.entries(CROPS_CONFIG)) {
-    const div = document.createElement('div');
-    div.className = 'seed-card' + (key === 'carrot' ? ' selected' : '');
-    div.id = 'seed-' + key;
-    div.innerHTML = `<span class="s-icon">${cfg.emoji}</span><b>${cfg.name}</b><br><span style="color:#d97706">${cfg.cost} xu</span>`;
-    div.onclick = () => {
-      selectedCrop = key;
-      document.querySelectorAll('.seed-card').forEach(el => el.classList.remove('selected'));
-      div.classList.add('selected');
-      toggleShop();
-      showToast(`Đã chọn ${cfg.name}`);
-    };
-    list.appendChild(div);
-  }
-}
-
-function renderGame() {
-  $('coins').textContent = myData.coins;
-  $('water').textContent = myData.water;
-  $('level').textContent = myData.level;
-  $('xp').textContent = myData.xp;
-
-  const g = $('garden');
-  if (g.children.length !== myData.plots.length) g.innerHTML = '';
-
-  myData.plots.forEach((p, index) => {
-    let btn = g.children[index];
-    if (!btn) { btn = document.createElement('button'); g.appendChild(btn); }
-
-    const now = Date.now();
-    const cfg = p.crop ? CROPS_CONFIG[p.crop] : null;
-
-    if (!cfg) {
-      btn.className = 'plot';
-      btn.innerHTML = '🟫';
-      btn.onclick = () => {
-        if (myData.coins < CROPS_CONFIG[selectedCrop].cost) return showToast('Không đủ xu!');
-        socket.emit('plant', { slot: p.slot, crop: selectedCrop });
-      };
-    } else if (now >= p.ready_at) {
-      btn.className = 'plot ready';
-      btn.innerHTML = `<span class="crop-icon">${cfg.emoji}</span>`;
-      btn.onclick = () => socket.emit('harvest', { slot: p.slot });
-    } else {
-      btn.className = 'plot growing';
-      const percent = Math.min(100, ((now - (p.ready_at - cfg.grow)) / cfg.grow) * 100);
-      btn.innerHTML = `
-        <span class="crop-icon" style="filter:grayscale(0.5); opacity:0.8">${cfg.emoji}</span>
-        <div class="progress-wrap"><div class="progress" style="width:${percent}%"></div></div>
-      `;
-      btn.onclick = () => showToast('Cây chưa chín, đợi chút nhé!');
-    }
-  });
-}
-
-setInterval(() => { if (myData.plots.length && $('gameArea').style.display !== 'none') renderGame(); }, 1000);
-window.addEventListener('load', () => { if (localStorage.getItem('token')) connect(); });
-</script>
-</body>
-   </html>
+    if (j.isAdmin) { location.href = '/admin.html'; 
