@@ -5,47 +5,134 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin - Nông Trại Tuấn Pro</title>
 <style>
-  body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1419;color:#e8f5e9;margin:0;padding:15px}
-  h1{font-size:20px;margin-bottom:20px;text-align:center; color: #6ee7a0;}
-  .cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;justify-content:center}
-  .card{background:#1c2530;border:1px solid #2e3d4d;border-radius:14px;padding:12px 15px;min-width:100px;text-align:center;flex:1}
-  .card span{font-size:12px; color:#8fb3a0}
-  .card b{display:block;font-size:22px;color:#fff;margin-top:4px}
+  /* THEME CYBERPUNK NEON */
+  * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background-color: #050a12; color: #e2e8f0; margin: 0; padding: 20px 15px; background-image: radial-gradient(circle at 50% 0%, #102a43 0%, #050a12 70%); min-height: 100vh;}
   
-  .table-wrap{overflow-x:auto;background:#151d26;border-radius:12px;padding:10px}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:500px}
-  th,td{padding:12px 8px;border-bottom:1px solid #26313d;text-align:center}
-  th{color:#8fb3a0;font-weight:normal; background:#1c2530}
+  h1 { text-align: center; color: #00f3ff; text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff; font-size: 24px; margin-bottom: 25px; letter-spacing: 1px;}
   
-  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#555}
-  .dot.on{background:#22c55e;box-shadow:0 0 8px #22c55e}
+  /* CARDS */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 600px; margin: 0 auto 20px; }
+  .card { background: rgba(13, 23, 42, 0.8); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; position: relative; overflow: hidden;}
+  .card::before { content: ''; position: absolute; inset: 0; border-radius: 12px; pointer-events: none; }
   
-  button{padding:6px 10px;border:0;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;margin:2px;}
-  .ban{background:#dc2626;color:#fff}
-  .unban{background:#16a34a;color:#fff}
-  .set-coin{background:#3b82f6;color:#fff;}
+  .card.blue { border: 1px solid #1e3a8a; box-shadow: 0 0 15px rgba(30, 58, 138, 0.5); }
+  .card.blue::before { box-shadow: inset 0 0 15px rgba(30, 58, 138, 0.3); }
+  .card.blue .val { color: #3b82f6; text-shadow: 0 0 8px #3b82f6; }
   
-  .level-badge {background:#8b5cf6;color:#fff;padding:2px 6px;border-radius:4px;font-weight:bold;}
+  .card.green { border: 1px solid #166534; box-shadow: 0 0 15px rgba(22, 101, 52, 0.5); }
+  .card.green::before { box-shadow: inset 0 0 15px rgba(22, 101, 52, 0.3); }
+  .card.green .val { color: #22c55e; text-shadow: 0 0 8px #22c55e; }
+  
+  .card.purple { border: 1px solid #4c1d95; box-shadow: 0 0 15px rgba(76, 29, 149, 0.5); }
+  .card.purple::before { box-shadow: inset 0 0 15px rgba(76, 29, 149, 0.3); }
+  .card.purple .val { color: #a855f7; text-shadow: 0 0 8px #a855f7; }
+  
+  .card.red { border: 1px solid #7f1d1d; box-shadow: 0 0 15px rgba(127, 29, 29, 0.5); }
+  .card.red::before { box-shadow: inset 0 0 15px rgba(127, 29, 29, 0.3); }
+  .card.red .val { color: #ef4444; text-shadow: 0 0 8px #ef4444; }
+
+  .card .icon { font-size: 28px; filter: drop-shadow(0 0 5px currentColor); }
+  .card .info { display: flex; flex-direction: column; }
+  .card .title { font-size: 13px; color: #94a3b8; margin-bottom: 4px; }
+  .card .val { font-size: 24px; font-weight: bold; }
+
+  /* TABLE */
+  .table-container { max-width: 600px; margin: 0 auto; background: rgba(13, 23, 42, 0.9); border-radius: 16px; border: 1px solid #1e3a8a; box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); overflow: hidden; }
+  .table-header { display: flex; justify-content: space-between; padding: 15px 20px; background: rgba(0, 243, 255, 0.05); border-bottom: 1px solid #1e3a8a; color: #00f3ff; font-weight: bold; }
+  
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { color: #64748b; font-weight: normal; text-align: left; padding: 12px 15px; border-bottom: 1px solid #1e293b; font-size: 13px;}
+  td { padding: 12px 15px; border-bottom: 1px solid #1e293b; vertical-align: middle; }
+  
+  .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #475569; }
+  .status-dot.on { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+
+  .u-name { font-weight: bold; color: #f8fafc; display: flex; align-items: center; gap: 5px; }
+  .lv-badge { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #7c3aed; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+  .coin-text { color: #fbbf24; font-weight: bold; }
+  
+  /* 3 DOT BUTTON */
+  .action-btn { background: none; border: none; color: #00f3ff; font-size: 24px; cursor: pointer; padding: 0 10px; display: flex; align-items: center; justify-content: center; height: 100%; transition: 0.2s; }
+  .action-btn:hover { text-shadow: 0 0 10px #00f3ff; transform: scale(1.1); }
+
+  /* MODAL POPUP */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  
+  .modal-box { background: #0f172a; border: 1px solid #00f3ff; box-shadow: 0 0 30px rgba(0, 243, 255, 0.3); border-radius: 16px; width: 100%; max-width: 350px; padding: 20px; position: relative; color: #fff; animation: slideUp 0.3s; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  
+  .modal-box h3 { margin-top: 0; color: #00f3ff; text-align: center; border-bottom: 1px solid #1e293b; padding-bottom: 10px; }
+  .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
+  
+  .input-group { margin-bottom: 15px; }
+  .input-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 5px; }
+  .input-group input { width: 100%; background: #020617; border: 1px solid #1e3a8a; color: #fff; padding: 12px; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; }
+  .input-group input:focus { border-color: #00f3ff; box-shadow: 0 0 10px rgba(0,243,255,0.2); }
+  
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  .btn-give { background: #22c55e; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); transition: 0.2s; }
+  .btn-give:hover { background: #16a34a; box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
+  .btn-ban { background: #ef4444; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); transition: 0.2s; }
+  .btn-ban:hover { background: #dc2626; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+  .btn-unban { background: #3b82f6; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
 </style>
 </head>
 <body>
 
-<h1>🌻 Bảng Điều Khiển Admin</h1>
-<div class="cards" id="cards"></div>
+<h1>🌻 BẢNG ĐIỀU KHIỂN ADMIN</h1>
 
-<div class="table-wrap">
+<div class="cards" id="cards">
+  <!-- Sẽ được điền bằng JS -->
+</div>
+
+<div class="table-container">
+  <div class="table-header">
+    <span>Người chơi Online</span>
+    <span id="onlineCount">0</span>
+  </div>
   <table>
     <thead>
       <tr>
         <th>Online</th>
-        <th>Tài khoản</th>
+        <th>Tên người chơi</th>
         <th>Cấp độ</th>
         <th>Xu</th>
-        <th>Hành động</th>
+        <th style="text-align:center">Thao tác</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>
+</div>
+
+<!-- MODAL (POPUP) NHẬP LIỆU -->
+<div class="modal-overlay" id="actionModal">
+  <div class="modal-box">
+    <button class="close-btn" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Tặng quà</h3>
+    
+    <div class="input-group">
+      <label>🪙 Tặng Xu (Nhập số âm để trừ)</label>
+      <input type="number" id="inputCoins" placeholder="Ví dụ: 1000">
+    </div>
+    
+    <div class="input-group">
+      <label>💧 Tặng Nước</label>
+      <input type="number" id="inputWater" placeholder="Ví dụ: 50">
+    </div>
+
+    <div class="input-group">
+      <label>✨ Tặng EXP</label>
+      <input type="number" id="inputXp" placeholder="Ví dụ: 500">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-give" id="btnGive" onclick="giveResources()">Xác nhận</button>
+      <button class="btn-ban" id="btnBan" onclick="toggleBan()">Ban</button>
+    </div>
+  </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -54,17 +141,35 @@ const token = localStorage.getItem('token');
 if (!token) location.href = '/';
 const H = { 'Authorization': 'Bearer ' + token };
 
+let currentUserId = null;
+let currentUserBanned = false;
+
 async function loadStats() {
   try {
     const r = await fetch('/api/admin/stats', { headers: H });
     if (r.status === 403) { alert('Bạn không phải admin!'); location.href = '/'; return; }
     const s = await r.json();
+    
+    document.getElementById('onlineCount').textContent = s.online;
     document.getElementById('cards').innerHTML = `
-      <div class="card"><span>Tổng TK</span><b>${s.accounts}</b></div>
-      <div class="card"><span>Online</span><b style="color:#22c55e">${s.online}</b></div>
-      <div class="card"><span>Bị khoá</span><b style="color:#dc2626">${s.banned}</b></div>
+      <div class="card blue">
+        <div class="icon">👥</div>
+        <div class="info"><span class="title">Tổng TK</span><span class="val">${s.accounts}</span></div>
+      </div>
+      <div class="card green">
+        <div class="icon">📡</div>
+        <div class="info"><span class="title">Online</span><span class="val">${s.online}</span></div>
+      </div>
+      <div class="card purple">
+        <div class="icon">👤</div>
+        <div class="info"><span class="title">Người chơi</span><span class="val">${s.accounts}</span></div>
+      </div>
+      <div class="card red">
+        <div class="icon">🔒</div>
+        <div class="info"><span class="title">Bị khoá</span><span class="val">${s.banned}</span></div>
+      </div>
     `;
-  } catch(e) { console.log('Lỗi tải stats', e); }
+  } catch(e) {}
 }
 
 async function loadUsers() {
@@ -76,47 +181,75 @@ async function loadUsers() {
     const sortedUsers = d.rows.sort((a, b) => (b.online ? 1 : 0) - (a.online ? 1 : 0));
 
     document.getElementById('rows').innerHTML = sortedUsers.map(u => `
-      <tr style="${u.online ? 'background:rgba(34,197,94,0.05)' : ''}">
-        <td><span class="dot ${u.online ? 'on' : ''}"></span></td>
-        <td style="font-weight:bold">${u.username}${u.is_admin ? ' 👑' : ''}</td>
-        <td><span class="level-badge">Lv.${u.level}</span></td>
-        <td style="color:#eab308; font-weight:bold">💰 ${u.coins}</td>
+      <tr>
+        <td><span class="status-dot ${u.online ? 'on' : ''}"></span></td>
         <td>
-          <button class="set-coin" onclick="setCoins(${u.id}, ${u.coins}, '${u.username}')">Sửa Xu</button>
-          ${u.is_admin ? '' : `
-            <button class="${u.is_banned ? 'unban' : 'ban'}" onclick="setBan(${u.id}, ${u.is_banned ? 0 : 1})">
-              ${u.is_banned ? 'Mở Khoá' : 'Ban'}
-            </button>
-          `}
+          <div class="u-name">${u.username} ${u.is_admin ? '👑' : ''}</div>
+        </td>
+        <td><span class="lv-badge">Lv.${u.level}</span></td>
+        <td><span class="coin-text">💰 ${u.coins}</span></td>
+        <td style="text-align:center">
+          <button class="action-btn" onclick="openModal(${u.id}, '${u.username}', ${u.is_banned})">⋮</button>
         </td>
       </tr>
     `).join('');
-  } catch(e) { console.log('Lỗi tải users', e); }
+  } catch(e) {}
 }
 
-// Hàm SỬA xu (ghi đè số tiền)
-async function setCoins(id, currentCoins, username) {
-  const newCoins = prompt(`Sửa lại tổng số xu của "${username}":`, currentCoins);
-  if (newCoins !== null && !isNaN(newCoins)) {
-    await fetch(`/api/admin/users/${id}/setcoins`, {
-      method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ coins: parseInt(newCoins) })
-    });
-    loadUsers();
+// MỞ POPUP NHẬP LIỆU
+function openModal(id, username, isBanned) {
+  currentUserId = id;
+  currentUserBanned = !!isBanned;
+  
+  document.getElementById('modalTitle').textContent = `Thao tác: ${username}`;
+  document.getElementById('inputCoins').value = '';
+  document.getElementById('inputWater').value = '';
+  document.getElementById('inputXp').value = '';
+  
+  const btnBan = document.getElementById('btnBan');
+  if (currentUserBanned) {
+    btnBan.textContent = 'Mở Khoá';
+    btnBan.className = 'btn-unban';
+  } else {
+    btnBan.textContent = 'Ban';
+    btnBan.className = 'btn-ban';
   }
+  
+  document.getElementById('actionModal').classList.add('show');
 }
 
-// Hàm Khoá/Mở khoá
-async function setBan(id, banned) {
-  if(!confirm(banned ? 'Bạn có chắc muốn BAN tài khoản này?' : 'Mở khoá tài khoản này?')) return;
-  await fetch(`/api/admin/users/${id}/ban`, { 
-    method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ banned: !!banned }) 
-  });
+function closeModal() {
+  document.getElementById('actionModal').classList.remove('show');
+}
+
+// TẶNG QUÀ
+async function giveResources() {
+  const coins = parseInt(document.getElementById('inputCoins').value) || 0;
+  const water = parseInt(document.getElementById('inputWater').value) || 0;
+  const xp = parseInt(document.getElementById('inputXp').value) || 0;
+
+  if (coins === 0 && water === 0 && xp === 0) return alert('Vui lòng nhập số lượng!');
+
+  if (coins !== 0) await fetch(`/api/admin/users/${currentUserId}/give`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'coins', amount: coins }) });
+  if (water !== 0) await fetch(`/api/admin/users/${currentUserId}/give`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'water', amount: water }) });
+  if (xp !== 0) await fetch(`/api/admin/users/${currentUserId}/give`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'xp', amount: xp }) });
+
+  alert('Đã gửi quà thành công!');
+  closeModal();
+  loadUsers();
+}
+
+// BAN / UNBAN
+async function toggleBan() {
+  if (!confirm(currentUserBanned ? 'Mở khoá tài khoản này?' : 'BAN tài khoản này?')) return;
+  const newBannedStatus = currentUserBanned ? 0 : 1;
+  await fetch(`/api/admin/users/${currentUserId}/ban`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ banned: newBannedStatus }) });
+  closeModal();
   loadUsers(); loadStats();
 }
 
 loadStats(); loadUsers();
-setInterval(loadStats, 15000); // Cập nhật số online mỗi 15s
+setInterval(loadStats, 10000); // Cập nhật mỗi 10s
 </script>
 </body>
-</html>
+  </html>
