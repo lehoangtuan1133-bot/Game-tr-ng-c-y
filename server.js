@@ -11,8 +11,8 @@ const SECRET = process.env.JWT_SECRET || 'bi_mat_mac_dinh_123';
 
 const db = new Database('farm.db');
 db.exec(`
-CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, is_admin INTEGER DEFAULT 0, is_banned INTEGER DEFAULT 0, coins INTEGER DEFAULT 50, water INTEGER DEFAULT 5, fertilizer INTEGER DEFAULT 0, xp INTEGER DEFAULT 0, level INTEGER DEFAULT 1, plot_count INTEGER DEFAULT 1, created_at INTEGER NOT NULL, last_login INTEGER);
-CREATE TABLE IF NOT EXISTS plots (user_id INTEGER NOT NULL, slot INTEGER NOT NULL, crop TEXT, planted_at INTEGER, ready_at INTEGER, bonus INTEGER DEFAULT 0, PRIMARY KEY (user_id, slot));
+CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, is_admin INTEGER DEFAULT 0, is_banned INTEGER DEFAULT 0, coins INTEGER DEFAULT 50, water INTEGER DEFAULT 5, xp INTEGER DEFAULT 0, level INTEGER DEFAULT 1, plot_count INTEGER DEFAULT 1, created_at INTEGER NOT NULL, last_login INTEGER);
+CREATE TABLE IF NOT EXISTS plots (user_id INTEGER NOT NULL, slot INTEGER NOT NULL, crop TEXT, planted_at INTEGER, ready_at INTEGER, bonus INTEGER DEFAULT 0, pest INTEGER DEFAULT 0, PRIMARY KEY (user_id, slot));
 `);
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
@@ -31,7 +31,7 @@ const CROPS = {
 
 const LUCK_TABLE = [{chance:0.03,mult:2},{chance:0.13,mult:1.5},{chance:0.33,mult:1.2}];
 const XP_PER_LEVEL = 100;
-const PLOT_UNLOCK_XP = 50;
+const UPGRADE_XP = 1000;
 const WATER_BOOST = 5000;
 const FERT_BOOST = 10000;
 const FERT_COST = 15;
@@ -40,15 +40,15 @@ const sign = u => jwt.sign({ id: u.id }, SECRET, { expiresIn: '30d' });
 const verify = t => { try { return jwt.verify(t, SECRET); } catch { return null; } };
 
 function getState(userId) {
-  const u = db.prepare('SELECT coins, water, fertilizer, xp, level, plot_count FROM users WHERE id=?').get(userId);
+  const u = db.prepare('SELECT coins, water, xp, level, plot_count FROM users WHERE id=?').get(userId);
   const p = db.prepare('SELECT * FROM plots WHERE user_id=?').all(userId);
   const plots = Array(u.plot_count).fill(null);
   p.forEach(row => {
     if(row.slot < u.plot_count) {
-      plots[row.slot] = { key: row.crop, start: row.planted_at, time: CROPS[row.crop].time, sell: CROPS[row.crop].sell, bonus: row.bonus, ready: Date.now() >= row.ready_at };
+      plots[row.slot] = { key: row.crop, start: row.planted_at, time: CROPS[row.crop].time, sell: CROPS[row.crop].sell, bonus: row.bonus, ready: Date.now() >= row.ready_at, pest: !!row.pest };
     }
   });
-  return { coins: u.coins, water: u.water, fertilizer: u.fertilizer, xp: u.xp, level: u.level, plot_count: u.plot_count, plots };
+  return { coins: u.coins, water: u.water, xp: u.xp, level: u.level, plot_count: u.plot_count, plots };
 }
 
 const app = express();
@@ -101,23 +101,19 @@ app.post('/api/admin/users/:id/ban', adminOnly, (req, res) => {
   res.json({ ok: true });
 });
 
-// API TẶNG XU / NƯỚC / EXP
 app.post('/api/admin/users/:id/give', adminOnly, (req, res) => {
   const id = +req.params.id;
   const { type, amount } = req.body;
   const num = parseInt(amount);
   if (isNaN(num)) return res.status(400).json({ error: 'Số lượng không hợp lệ' });
-
   if (type === 'coins') db.prepare('UPDATE users SET coins = coins + ? WHERE id=?').run(num, id);
   else if (type === 'water') db.prepare('UPDATE users SET water = water + ? WHERE id=?').run(num, id);
   else if (type === 'xp') {
     db.prepare('UPDATE users SET xp = xp + ? WHERE id=?').run(num, id);
-    // Cập nhật lại level nếu EXP tăng
     const u = db.prepare('SELECT xp FROM users WHERE id=?').get(id);
     const newLevel = 1 + Math.floor(u.xp / XP_PER_LEVEL);
     db.prepare('UPDATE users SET level=? WHERE id=?').run(newLevel, id);
   }
-
   io.to(`u:${id}`).emit('state', getState(id));
   res.json({ ok: true });
 });
@@ -146,11 +142,11 @@ io.on('connection', socket => {
     if (!cfg) return;
     const u = db.prepare('SELECT coins, plot_count FROM users WHERE id=?').get(uid);
     if (slot >= u.plot_count) return;
-    if (u.coins < cfg.price) return socket.emit('toast', 'Không đủ xu!', 'error');
+    if (u.coins < cfg.price) return socket.emit('toast', 'Không đủ xu!');
     const now = Date.now();
     db.transaction(() => {
       db.prepare('UPDATE users SET coins = coins - ? WHERE id=?').run(cfg.price, uid);
-      db.prepare(`INSERT INTO plots(user_id,slot,crop,planted_at,ready_at,bonus) VALUES (?,?,?,?,?,0) ON CONFLICT(user_id,slot) DO UPDATE SET crop=excluded.crop, planted_at=excluded.planted_at, ready_at=excluded.ready_at, bonus=0`).run(uid, slot, crop, now, now + cfg.time);
+      db.prepare(`INSERT INTO plots(user_id,slot,crop,planted_at,ready_at,bonus,pest) VALUES (?,?,?,?,?,0,0) ON CONFLICT(user_id,slot) DO UPDATE SET crop=excluded.crop, planted_at=excluded.planted_at, ready_at=excluded.ready_at, bonus=0, pest=0`).run(uid, slot, crop, now, now + cfg.time);
     })();
     io.to(`u:${uid}`).emit('state', getState(uid));
   });
@@ -158,19 +154,18 @@ io.on('connection', socket => {
   socket.on('care', ({ slot, type }) => {
     const p = db.prepare('SELECT * FROM plots WHERE user_id=? AND slot=?').get(uid, slot);
     if (!p || !p.crop) return;
-    const u = db.prepare('SELECT coins, water, fertilizer FROM users WHERE id=?').get(uid);
+    const u = db.prepare('SELECT coins, water FROM users WHERE id=?').get(uid);
     const boost = type === 'water' ? WATER_BOOST : FERT_BOOST;
     if (type === 'water') {
-      if (u.water <= 0) return socket.emit('toast', 'Hết nước!', 'error');
+      if (u.water <= 0) return socket.emit('toast', 'Hết nước!');
       db.prepare('UPDATE users SET water = water - 1 WHERE id=?').run(uid);
     } else {
-      if (u.fertilizer > 0) db.prepare('UPDATE users SET fertilizer = fertilizer - 1 WHERE id=?').run(uid);
-      else if (u.coins >= FERT_COST) db.prepare('UPDATE users SET coins = coins - ? WHERE id=?').run(FERT_COST, uid);
-      else return socket.emit('toast', 'Không đủ xu mua phân!', 'error');
+      if (u.coins >= FERT_COST) db.prepare('UPDATE users SET coins = coins - ? WHERE id=?').run(FERT_COST, uid);
+      else return socket.emit('toast', 'Không đủ xu mua phân!');
     }
     db.prepare('UPDATE plots SET ready_at = ready_at - ?, bonus = bonus + ? WHERE user_id=? AND slot=?').run(boost, boost, uid, slot);
     io.to(`u:${uid}`).emit('state', getState(uid));
-    socket.emit('toast', type === 'water' ? '💧 Đã tưới nước (-5s)' : '💩 Đã bón phân (-10s)', 'success');
+    socket.emit('toast', type === 'water' ? '💧 Đã tưới nước!' : '💩 Đã bón phân!');
   });
 
   socket.on('harvest', ({ slot }) => {
@@ -188,32 +183,34 @@ io.on('connection', socket => {
     })();
     const u = db.prepare('SELECT xp, level, plot_count FROM users WHERE id=?').get(uid);
     const newLevel = 1 + Math.floor(u.xp / XP_PER_LEVEL);
-    let newPlotCount = u.plot_count;
-    if (u.xp >= PLOT_UNLOCK_XP && u.plot_count === 1) newPlotCount = 4;
-    if (newLevel > u.level || newPlotCount > u.plot_count) {
-      db.prepare('UPDATE users SET level=?, plot_count=? WHERE id=?').run(newLevel, newPlotCount, uid);
-      if (newLevel > u.level) socket.emit('toast', `⭐ LÊN CẤP ${newLevel}!`, 'success');
-      if (newPlotCount > u.plot_count) socket.emit('toast', `🎉 Mở khoá thêm ô đất!`, 'success');
+    if (newLevel > u.level) {
+      db.prepare('UPDATE users SET level=? WHERE id=?').run(newLevel, uid);
+      socket.emit('toast', `⭐ LÊN CẤP ${newLevel}!`);
     }
     io.to(`u:${uid}`).emit('state', getState(uid));
     socket.emit('harvestResult', { reward, luckLabel, xpGain });
   });
 
+  socket.on('catchPest', ({ slot }) => {
+    db.prepare('UPDATE plots SET pest=0 WHERE user_id=? AND slot=?').run(uid, slot);
+    io.to(`u:${uid}`).emit('state', getState(uid));
+  });
+
   socket.on('buyWater', () => {
     const u = db.prepare('SELECT coins FROM users WHERE id=?').get(uid);
-    if (u.coins < 10) return socket.emit('toast', 'Không đủ xu!', 'error');
+    if (u.coins < 10) return socket.emit('toast', 'Không đủ xu!');
     db.prepare('UPDATE users SET coins = coins - 10, water = water + 5 WHERE id=?').run(uid);
     io.to(`u:${uid}`).emit('state', getState(uid));
-    socket.emit('toast', 'Đã mua 5 nước!', 'success');
+    socket.emit('toast', 'Đã mua 5 nước!');
   });
 
   socket.on('buyPlot', () => {
     const u = db.prepare('SELECT coins, xp, plot_count FROM users WHERE id=?').get(uid);
-    if (u.xp < 1000) return socket.emit('toast', 'Cần 1000 EXP!', 'error');
-    if (u.coins < 100) return socket.emit('toast', 'Không đủ xu!', 'error');
+    if (u.xp < 1000) return socket.emit('toast', 'Cần 1000 EXP!');
+    if (u.coins < 100) return socket.emit('toast', 'Không đủ xu!');
     db.prepare('UPDATE users SET coins = coins - 100, plot_count = plot_count + 1 WHERE id=?').run(uid);
     io.to(`u:${uid}`).emit('state', getState(uid));
-    socket.emit('toast', '🏡 Đã mở thêm 1 ô đất!', 'success');
+    socket.emit('toast', '🏡 Đã mở thêm 1 ô đất!');
   });
 
   socket.on('disconnect', () => {
